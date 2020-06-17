@@ -27,7 +27,7 @@ TAKES
 
 RETURNS review objects filtered
 */
-router.get("/find", (req, res) => {
+router.post("/find", (req, res) => {
   if (req.body.filters.date) req.body.filters.date = { $regex: new RegExp(req.body.filters.date) }
   Review.find(req.body.filters, getExclusionObject(req.body.exclusions))
     .then((reviews) => (reviews.length > 0 ? res.json(reviews) : res.status(404).json("No reviews found for filters")))

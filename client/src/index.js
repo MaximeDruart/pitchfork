@@ -1,11 +1,11 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import App from "./App"
 import * as serviceWorker from "./serviceWorker"
+import AppWrap from "./AppWrap"
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <AppWrap />
   </React.StrictMode>,
   document.getElementById("root")
 )
