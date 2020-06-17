@@ -1,3 +1,3 @@
-## ALT TAB
+## Pitchfork reviews data analysis
 
-Live multiplayer game platform
+Analysing over 20 000 pitchfork reviews
