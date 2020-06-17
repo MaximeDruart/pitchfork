@@ -1,7 +1,9 @@
 const initialState = {
   loading: false,
   reviews: [],
-  error: "",
+  reviewsError: "",
+  reviewers: [],
+  reviewersError: "",
 }
 
 const apiReducer = (state = initialState, action) => {
@@ -16,16 +18,44 @@ const apiReducer = (state = initialState, action) => {
 
         case "success":
           return {
+            ...state,
             loading: false,
             reviews: action.reviews,
-            error: "",
+            reviewsError: "",
           }
 
         case "error":
           return {
+            ...state,
             loading: false,
             reviews: [],
-            error: action.error,
+            reviewsError: action.error,
+          }
+
+        default:
+          return state
+      }
+
+    case "FETCH_REVIEWERS":
+      switch (action.status) {
+        case "pending":
+          return {
+            ...state,
+            loading: true,
+          }
+
+        case "success":
+          return {
+            ...state,
+            loading: false,
+            reviewers: action.reviewers,
+          }
+
+        case "error":
+          return {
+            ...state,
+            loading: false,
+            reviewersError: action.error,
           }
 
         default:

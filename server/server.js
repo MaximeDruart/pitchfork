@@ -22,6 +22,9 @@ mongoose
 const reviewsRouter = require("./routes/reviews")
 app.use("/reviews", reviewsRouter)
 
+const reviewersRouter = require("./routes/reviewers")
+app.use("/reviewers", reviewersRouter)
+
 // for heroku prod
 if (process.env.NODE_ENV === "production") {
   // Set static folder

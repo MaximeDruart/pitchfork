@@ -3,6 +3,7 @@ import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import gsap from "gsap"
 import ThreePlugin from "./GSAPTHREE"
+import styled from "styled-components"
 gsap.registerPlugin(ThreePlugin)
 
 const CanvasContainer = styled.div`
@@ -68,8 +69,6 @@ const THREECanvas = () => {
     }
 
     // scene transitions
-    updateContext("introSpawnTl", introSpawnTl)
-    updateContext("goToSecondTl", goToSecondTl)
 
     /**
      * Lights
@@ -82,6 +81,7 @@ const THREECanvas = () => {
      * Renderer
      */
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false })
+    // const renderer = new THREE.WebGLRenderer({ antialias: false })
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setClearAlpha(0)

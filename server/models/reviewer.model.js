@@ -1,9 +1,9 @@
 const mongoose = require("mongoose")
 
-const reviewSchema = require("./review.model").schema
 const reviewerSchema = new mongoose.Schema(
   {
     name: String,
+    slug: String,
     reviewCount: Number,
     averageScore: Number,
     preferedGenre: String,
