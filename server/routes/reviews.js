@@ -4,6 +4,8 @@ const Review = require("../models/review.model").model
 
 const getExclusionObject = require("../config/utils")
 
+const Crawler = require("crawler")
+
 // if bool is true, returning an object that will exclude the descripiton in the data returned, otherwise return an empty object.
 
 /**
@@ -97,5 +99,22 @@ const recMultiGenre = (reviews, index, res) => {
     recMultiGenre(reviews, index + 1, res)
   }
 }
+
+// add srcs to each review
+
+// const fs = require("fs")
+// let rawdata = fs.readFileSync("./srcLast.json")
+// let src = JSON.parse(rawdata)
+let index = 0
+router.get("/src", (req, res) => {
+  Review.updateMany(
+    {},
+    {
+      $set: {
+        coverSrc: src[index++],
+      },
+    }
+  )
+})
 
 module.exports = router

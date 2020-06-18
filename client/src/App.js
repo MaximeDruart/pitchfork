@@ -15,6 +15,7 @@ const App = () => {
   const { pathname } = useLocation()
   const { activePage } = useSelector((state) => state.ui)
   const dispatch = useDispatch()
+  const location = useLocation()
 
   // when the activePage is changed in store, app will do the routing and change the url accordingly. an alternative would probably be using connect-react-router.
   useEffect(() => {
@@ -37,7 +38,7 @@ const App = () => {
         <Route path="/reviewer/:slug" component={ReviewerDetail} />
       </Switch>
       {/* COMPONENTS ON ALL ROUTES */}
-      <Nav />
+      {location.pathname !== "/" && <Nav />}
       <THREECanvas />
     </div>
   )

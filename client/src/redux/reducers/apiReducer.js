@@ -1,6 +1,7 @@
 const initialState = {
   loading: false,
   reviews: [],
+  filteredReviews: [],
   reviewsError: "",
   reviewers: [],
   reviewersError: "",
@@ -21,6 +22,7 @@ const apiReducer = (state = initialState, action) => {
             ...state,
             loading: false,
             reviews: action.reviews,
+            filteredReviews: state.filteredReviews.length > 0 ? state.filteredReviews : action.reviews,
             reviewsError: "",
           }
 
