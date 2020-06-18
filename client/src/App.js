@@ -8,6 +8,7 @@ import Galaxy from "./components/interfaces/Galaxy"
 import ReviewerDetail from "./components/interfaces/ReviewerDetail"
 import { useSelector, useDispatch } from "react-redux"
 import { changePage } from "./redux/actions/uiActions"
+import Nav from "./components/Nav"
 
 const App = () => {
   const history = useHistory()
@@ -20,20 +21,23 @@ const App = () => {
     if (activePage !== "" && activePage !== pathname) {
       history.push(activePage)
     }
-  }, [activePage])
+  }, [activePage, history, pathname])
 
   // on load, change the activePage in store to the current url
   useEffect(() => {
     dispatch(changePage(pathname))
-  }, [])
+  }, [dispatch, pathname])
 
   return (
     <div className="app">
+      {/* SCENE COMPONENTS */}
       <Switch>
         <Route path="/" exact component={Intro} />
         <Route path="/galaxy" exact component={Galaxy} />
         <Route path="/reviewer/:slug" component={ReviewerDetail} />
       </Switch>
+      {/* COMPONENTS ON ALL ROUTES */}
+      <Nav />
       <THREECanvas />
     </div>
   )

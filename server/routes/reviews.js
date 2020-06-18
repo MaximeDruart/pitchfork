@@ -2,7 +2,7 @@ const router = require("express").Router()
 
 const Review = require("../models/review.model").model
 
-const getExclusionObject = require("../config/utils").getExclusionObject
+const getExclusionObject = require("../config/utils")
 
 // if bool is true, returning an object that will exclude the descripiton in the data returned, otherwise return an empty object.
 
@@ -77,11 +77,25 @@ router.get("/find/all", (req, res) => {
     .catch((err) => res.status(404).json(err))
 })
 
-/**
- * CREATING THE REVIEWER DATA
- * ------------------------------------------------------------------------------------
- */
+router.post("/removeMultiGenres", (req, res) => {
+  Review.find({}, { genre: 1 }).then((reviews) => {
+    recMultiGenre(reviews, 0, res)
+  })
+})
 
-// Recursivity seems to be the most stable solution for handling asynchronous request in a loop
+const recMultiGenre = (reviews, index, res) => {
+  if (reviews.length - 1 === index) return res.json({ done: "crup done !" })
+  const review = reviews[index]
+
+  if (review.genre.includes(",")) {
+    const keptGenre = review.genre.split(",")[0]
+    console.log(review.genre, ":", keptGenre)
+    Review.findByIdAndUpdate(review.id, { genre: keptGenre }).then(() => {
+      recMultiGenre(reviews, index + 1, res)
+    })
+  } else {
+    recMultiGenre(reviews, index + 1, res)
+  }
+}
 
 module.exports = router

@@ -11,16 +11,17 @@ import ReviewersOverlay from "./interfaceChildren/ReviewersOverlay"
 const ReviewerDetail = () => {
   const [showOverlay, setShowOverlay] = useState(false)
   const [reviewer, setReviewer] = useState(null)
+  const dispatch = useDispatch()
 
   const history = useHistory()
   const { reviewers, loading, reviewersError } = useSelector((state) => state.api)
   const { slug } = useParams()
-  const dispatch = useDispatch()
 
   // mongo command is find() so it sends back an array
   useEffect(() => {
-    dispatch(getReviewers({}, ["reviewIds"]))
-  }, [])
+    // only querying if data isnt already in store
+    if (reviewers.length === 0) dispatch(getReviewers({}, ["reviewIds"]))
+  }, [dispatch])
 
   useEffect(() => {
     if (!loading) {
@@ -38,7 +39,7 @@ const ReviewerDetail = () => {
         // error case to handle : loading is done but no reviewers retrieved
       }
     }
-  }, [loading])
+  }, [loading, history, reviewers, slug])
 
   useEffect(() => {
     if (reviewersError) {
@@ -53,9 +54,9 @@ const ReviewerDetail = () => {
       )}
       <div className="header">
         <div className="reviewer-name-container">
-          <div className="previous"> prev </div>
+          <div className="previous">prev</div>
           {loading ? <div className="name-placeholder"></div> : <div className="name">{reviewer?.name}</div>}
-          <div className="next"> next </div>
+          <div className="next">next</div>
         </div>
         <Button onClick={() => setShowOverlay(true)} className="see-all-reviewers">
           Show reviewers
