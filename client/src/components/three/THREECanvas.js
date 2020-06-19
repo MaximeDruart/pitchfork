@@ -218,7 +218,7 @@ const THREECanvas = () => {
     // if albums have been fetched and the initial sphere render is done
     if (reviews.length > 0 && !loading) {
       const albumNames = filteredReviews.map((review) => review.album)
-      th.filteredSphereGroup.children = sphereGroupAll.children.filter((sphere) =>
+      th.filteredSphereGroup.children = th.sphereGroup.children.filter((sphere) =>
         albumNames.includes(sphere.userData.album)
       )
     }
