@@ -19,13 +19,20 @@ const IntroContainer = styled.div`
   .text-container {
     margin-bottom: 15px;
     .over-title {
+      font-family: 'Noto Serif', serif;
+      font-size: 20px;
     }
     .title {
       font-size: 120px;
       text-transform: uppercase;
       line-height: 1;
+      font-weight: bold;
     }
     .under-title {
+      font-weight: 200;
+      font-size: 28px;
+      margin-top: 30px;
+      padding-bottom: 30px;
     }
   }
   .intro-button {
@@ -40,7 +47,7 @@ const Intro = () => {
         <div className="title">
           reviewing the <br></br> reviews
         </div>
-        <div className="under-title">see how the music evolved with pitchfork's reviews</div>
+        <div className="under-title">See how the music evolved with pitchfork's reviews</div>
       </div>
       <NavButton to="/galaxy" className="intro-button">
         start the experience

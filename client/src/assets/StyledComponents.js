@@ -54,13 +54,14 @@ export const NavButton = styled(Link)`
   font-size: 1rem;
   cursor: pointer;
   text-align: center;
-  transition: border 250ms ease-in-out;
+  transition: 0.6s;
   -webkit-appearance: none;
   -moz-appearance: none;
   background: transparent;
 
   &:hover,
   &:focus {
-    border: 2px solid white;
+    background: white;
+    color: black;
   }
 `
