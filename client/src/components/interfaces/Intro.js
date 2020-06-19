@@ -1,10 +1,6 @@
 import React from "react"
-import { changePage } from "../../redux/actions/uiActions"
-import { useDispatch } from "react-redux"
 import styled from "styled-components"
-
 import { Button, NavButton } from "../../assets/StyledComponents"
-import { NavLink, Link } from "react-router-dom"
 
 const IntroContainer = styled.div`
   z-index: 10;

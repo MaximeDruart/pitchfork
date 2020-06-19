@@ -106,6 +106,7 @@ const StyledGalaxy = styled.div`
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
+    user-select: none;
   }
   .genres {
     left: 20vw;

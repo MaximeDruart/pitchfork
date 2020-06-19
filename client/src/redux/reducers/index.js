@@ -1,10 +1,8 @@
 import apiReducer from "./apiReducer"
-import uiReducer from "./uiReducer"
-import galaxyReducer from "./galaxyReducer"
 import { combineReducers } from "redux"
+import interfaceReducer from "./interfaceReducer"
 
 export default combineReducers({
   api: apiReducer,
-  ui: uiReducer,
-  galaxy: galaxyReducer,
+  interface: interfaceReducer,
 })

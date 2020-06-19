@@ -4,9 +4,10 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import gsap from "gsap"
 import ThreePlugin from "./GSAPTHREE"
 import styled from "styled-components"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { useLocation } from "react-router-dom"
 import { dateToYearPercent } from "./utils"
+import { setHoveredAlbum } from "../../redux/actions/interfaceActions"
 import { cloneDeep } from "lodash"
 
 gsap.registerPlugin(ThreePlugin)
@@ -40,12 +41,11 @@ const th = {
   controls: "",
   sphere: {
     geometry: new THREE.SphereGeometry(0.2, 12, 12),
-    material: new THREE.MeshNormalMaterial(),
+    material: new THREE.MeshPhongMaterial(),
   },
+  sphereGroup: "",
   filteredSphereGroup: "",
 }
-
-let sphereGroupAll
 
 // th.sphereInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
@@ -53,6 +53,7 @@ const THREECanvas = () => {
   const $canvas = useRef(null)
   const { loading, reviews, filteredReviews } = useSelector((state) => state.api)
   const { pathname } = useLocation()
+  const dispatch = useDispatch()
 
   const toggleControls = (isTrue) => {
     if (isTrue) {
@@ -89,6 +90,13 @@ const THREECanvas = () => {
     toggleControls(true)
     th.camera.position.z = 15
 
+    {
+      const color = 0x000000 // black
+      const near = 10
+      const far = 25
+      th.scene.fog = new THREE.Fog(color, near, far)
+    }
+
     /**
      * Raycasting
      */
@@ -100,6 +108,13 @@ const THREECanvas = () => {
     }
     const onMouseDownHandler = () => (clicking = true)
     const onMouseUpHandler = () => (clicking = false)
+
+    /**
+     * Lighting
+     */
+
+    const hemiLight = new THREE.HemisphereLight("red", "blue")
+    th.scene.add(hemiLight)
 
     /**
      * Renderer
@@ -119,10 +134,14 @@ const THREECanvas = () => {
       const sphereGroup = th.scene.children.filter((child) => child.name === "sphereGroup")
       const intersects = th.rayCaster.intersectObjects(sphereGroup, true)
 
+      $canvas.current.style.cursor = "default"
+      if (clicking && intersects.length === 0) dispatch(setHoveredAlbum(null))
       for (var i = 0; i < intersects.length; i++) {
         // console.log("hovering", intersects[0].object.userData.album)
+        $canvas.current.style.cursor = "pointer"
         if (clicking) {
           // console.log("clicking :", intersects[0].object.userData.album)
+          dispatch(setHoveredAlbum(intersects[0].object.userData))
           clicking = false
         }
       }
@@ -177,19 +196,10 @@ const THREECanvas = () => {
         return sphereGroup
       }
 
-      console.log("getting spheres")
       let tempGrp = createSpheres()
-      sphereGroupAll = tempGrp
-      th.filteredSphereGroup = tempGrp
-      console.log(sphereGroupAll == th.filteredSphereGroup, sphereGroupAll === th.filteredSphereGroup)
+      th.sphereGroup = tempGrp
+      th.filteredSphereGroup = cloneDeep(tempGrp)
       th.scene.add(th.filteredSphereGroup)
-
-      {
-        const color = 0x000000 // black
-        const near = 10
-        const far = 15
-        th.scene.fog = new THREE.Fog(color, near, far)
-      }
 
       /** Instanced mesh approach, thing is you can't store data for each individual instance. Not even sure that it's better performance wise */
       // th.scene.add(th.sphereInstancedMesh)
@@ -204,24 +214,37 @@ const THREECanvas = () => {
   }, [reviews])
 
   // updating reviews with new filters
+  useEffect(() => {
+    // if albums have been fetched and the initial sphere render is done
+    if (reviews.length > 0 && !loading) {
+      const albumNames = filteredReviews.map((review) => review.album)
+      th.filteredSphereGroup.children = sphereGroupAll.children.filter((sphere) =>
+        albumNames.includes(sphere.userData.album)
+      )
+    }
+  }, [filteredReviews])
+
   // useEffect(() => {
-  //   // if albums have been fetched and the initial sphere render is done
-  //   if (reviews.length > 0 && !loading) {
+  //   if (!loading && reviews.length > 0) {
   //     const albumNames = filteredReviews.map((review) => review.album)
-  //     const copy = cloneDeep(sphereGroupAll)
-  //     console.log(copy)
-  //     // th.filteredSphereGroup.children = copy.children.filter((sphere) => albumNames.includes(sphere.
+  //     const childrenToFadeOut = []
+  //     th.filteredSphereGroup.children.forEach((sphereChild) => {
+  //       // if (albumNames.includes(sphereChild.userData.album)) scaleOut(sphereChild, () => (sphereChild.visible = false))
+  //       // sphereChild.visible = albumNames.includes(sphereChild.userData.album)
+  //       albumNames.includes(sphereChild.userData.album) && childrenToFadeOut.push(sphereChild)
+  //     })
+  //     // gsap.to(childrenToFadeOut, {
+  //     //   duration: 0.6,
+  //     //   three: { scaleX: 0.01, scaleY: 0.01, scaleZ: 0.01 },
+  //     //   stagger: 0.07,
+  //     // })
   //   }
   // }, [filteredReviews])
 
-  // useEffect(() => {
-  //   if (!loading) {
-  //     const albumNames = filteredReviews.map((review) => review.album)
-  //     th.filteredSphereGroup.children.forEach((sphereChild) => {
-  //       sphereChild.visible = albumNames.includes(sphereChild.userData.album)
-  //     })
-  //   }
-  // }, [filteredReviews])
+  const scaleOut = (threeObject, cb) => {
+    const tl = new gsap.timeline({ onComplete: cb() })
+    tl.to(threeObject.scale, { x: 0.01, y: 0.01, z: 0.01, duration: 0.3 })
+  }
 
   return <StyledCanvasContainer ref={$canvas} />
 }
