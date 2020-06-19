@@ -3,7 +3,8 @@ import { changePage } from "../../redux/actions/uiActions"
 import { useDispatch } from "react-redux"
 import styled from "styled-components"
 
-import { Button } from "../../assets/StyledComponents"
+import { Button, NavButton } from "../../assets/StyledComponents"
+import { NavLink, Link } from "react-router-dom"
 
 const IntroContainer = styled.div`
   z-index: 10;
@@ -12,6 +13,9 @@ const IntroContainer = styled.div`
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
+  * {
+    color: white;
+  }
   .text-container {
     margin-bottom: 15px;
     .over-title {
@@ -29,7 +33,6 @@ const IntroContainer = styled.div`
 `
 
 const Intro = () => {
-  const dispatch = useDispatch()
   return (
     <IntroContainer>
       <div className="text-container">
@@ -39,9 +42,9 @@ const Intro = () => {
         </div>
         <div className="under-title">see how the music evolved with pitchfork's reviews</div>
       </div>
-      <Button onClick={() => dispatch(changePage("/galaxy"))} className="intro-button">
+      <NavButton to="/galaxy" className="intro-button">
         start the experience
-      </Button>
+      </NavButton>
     </IntroContainer>
   )
 }

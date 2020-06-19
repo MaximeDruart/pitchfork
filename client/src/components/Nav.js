@@ -1,25 +1,25 @@
 import React from "react"
 import styled from "styled-components"
 import { useDispatch } from "react-redux"
-import { changePage } from "../redux/actions/uiActions"
+import { NavLink } from "react-router-dom"
 
 const Nav = () => {
   const dispatch = useDispatch()
   return (
     <StyledNav>
       <div className="nav-elements">
-        <div onClick={() => dispatch(changePage("/galaxy"))} className="nav-element">
+        <NavLink to="/galaxy" className="nav-element">
           <div className="nav-bar"></div>
           <div className="nav-link-text">albums</div>
-        </div>
-        <div onClick={() => dispatch(changePage("/reviewer/andy-beta"))} className="nav-element">
+        </NavLink>
+        <NavLink to="/reviewer/andy-beta" className="nav-element">
           <div className="nav-bar"></div>
           <div className="nav-link-text">reviewers</div>
-        </div>
-        <div onClick={() => dispatch(changePage("/else"))} className="nav-element">
+        </NavLink>
+        <NavLink to="/else" className="nav-element">
           <div className="nav-bar"></div>
           <div className="nav-link-text">else</div>
-        </div>
+        </NavLink>
       </div>
     </StyledNav>
   )

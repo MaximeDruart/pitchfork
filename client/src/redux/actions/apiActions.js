@@ -1,12 +1,13 @@
 import axios from "axios"
 
+// getting reviews
+
 export const fetchReviewsRequest = () => {
   return {
     type: "FETCH_REVIEWS",
     status: "pending",
   }
 }
-
 export const fetchReviewsSuccess = (reviews) => {
   return {
     type: "FETCH_REVIEWS",
@@ -14,7 +15,6 @@ export const fetchReviewsSuccess = (reviews) => {
     reviews,
   }
 }
-
 export const fetchReviewsError = (error) => {
   return {
     type: "FETCH_REVIEWS",
@@ -22,7 +22,6 @@ export const fetchReviewsError = (error) => {
     error,
   }
 }
-
 export const getReviews = (filters = {}, exclusions = []) => {
   return (dispatch) => {
     dispatch(fetchReviewsRequest())
@@ -40,13 +39,14 @@ export const getReviews = (filters = {}, exclusions = []) => {
   }
 }
 
+// getting reviewers
+
 export const fetchReviewersRequest = () => {
   return {
     type: "FETCH_REVIEWERS",
     status: "pending",
   }
 }
-
 export const fetchReviewersSuccess = (reviewers) => {
   return {
     type: "FETCH_REVIEWERS",
@@ -54,7 +54,6 @@ export const fetchReviewersSuccess = (reviewers) => {
     reviewers,
   }
 }
-
 export const fetchReviewersError = (error) => {
   return {
     type: "FETCH_REVIEWERS",
@@ -62,7 +61,6 @@ export const fetchReviewersError = (error) => {
     error,
   }
 }
-
 export const getReviewers = (filters = {}, exclusions = []) => {
   return (dispatch) => {
     dispatch(fetchReviewersRequest())
@@ -79,3 +77,20 @@ export const getReviewers = (filters = {}, exclusions = []) => {
       })
   }
 }
+
+// filtering reviews
+
+export const setPeriod = (payload) => ({
+  type: "SET_PERIOD",
+  payload,
+})
+
+export const setGenres = (payload) => ({
+  type: "SET_GENRES",
+  payload,
+})
+
+export const setScores = (payload) => ({
+  type: "SET_SCORES",
+  payload,
+})

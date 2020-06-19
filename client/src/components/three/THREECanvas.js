@@ -7,6 +7,7 @@ import styled from "styled-components"
 import { useSelector } from "react-redux"
 import { useLocation } from "react-router-dom"
 import { dateToYearPercent } from "./utils"
+import { cloneDeep } from "lodash"
 
 gsap.registerPlugin(ThreePlugin)
 
@@ -15,7 +16,7 @@ const StyledCanvasContainer = styled.div`
   top: 0;
   left: 0;
   z-index: -100;
-  opacity: 0.4;
+  /* opacity: 0.4; */
 `
 
 const vizOptions = {
@@ -28,7 +29,7 @@ const th = {
   scene: new THREE.Scene(),
   camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500),
   renderer: new THREE.WebGLRenderer({
-    // alpha : false,
+    alpha: false,
     antialias: false,
   }),
   rayCaster: new THREE.Raycaster(),
@@ -41,15 +42,12 @@ const th = {
     geometry: new THREE.SphereGeometry(0.2, 12, 12),
     material: new THREE.MeshNormalMaterial(),
   },
-  sphereInstancedMesh: new THREE.InstancedMesh(
-    new THREE.SphereGeometry(0.2, 12, 12),
-    new THREE.MeshNormalMaterial(),
-    8800
-  ),
-  dummy: new THREE.Object3D(),
+  filteredSphereGroup: "",
 }
 
-th.sphereInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+let sphereGroupAll
+
+// th.sphereInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
 const THREECanvas = () => {
   const $canvas = useRef(null)
@@ -122,9 +120,9 @@ const THREECanvas = () => {
       const intersects = th.rayCaster.intersectObjects(sphereGroup, true)
 
       for (var i = 0; i < intersects.length; i++) {
-        console.log("hovering", intersects[0].object.userData.album)
+        // console.log("hovering", intersects[0].object.userData.album)
         if (clicking) {
-          console.log("clicking :", intersects[0].object.userData.album)
+          // console.log("clicking :", intersects[0].object.userData.album)
           clicking = false
         }
       }
@@ -179,8 +177,19 @@ const THREECanvas = () => {
         return sphereGroup
       }
 
-      const grp = createSpheres()
-      th.scene.add(grp)
+      console.log("getting spheres")
+      let tempGrp = createSpheres()
+      sphereGroupAll = tempGrp
+      th.filteredSphereGroup = tempGrp
+      console.log(sphereGroupAll == th.filteredSphereGroup, sphereGroupAll === th.filteredSphereGroup)
+      th.scene.add(th.filteredSphereGroup)
+
+      {
+        const color = 0x000000 // black
+        const near = 10
+        const far = 15
+        th.scene.fog = new THREE.Fog(color, near, far)
+      }
 
       /** Instanced mesh approach, thing is you can't store data for each individual instance. Not even sure that it's better performance wise */
       // th.scene.add(th.sphereInstancedMesh)
@@ -193,6 +202,26 @@ const THREECanvas = () => {
       // console.log(th.scene.children)
     }
   }, [reviews])
+
+  // updating reviews with new filters
+  // useEffect(() => {
+  //   // if albums have been fetched and the initial sphere render is done
+  //   if (reviews.length > 0 && !loading) {
+  //     const albumNames = filteredReviews.map((review) => review.album)
+  //     const copy = cloneDeep(sphereGroupAll)
+  //     console.log(copy)
+  //     // th.filteredSphereGroup.children = copy.children.filter((sphere) => albumNames.includes(sphere.
+  //   }
+  // }, [filteredReviews])
+
+  // useEffect(() => {
+  //   if (!loading) {
+  //     const albumNames = filteredReviews.map((review) => review.album)
+  //     th.filteredSphereGroup.children.forEach((sphereChild) => {
+  //       sphereChild.visible = albumNames.includes(sphereChild.userData.album)
+  //     })
+  //   }
+  // }, [filteredReviews])
 
   return <StyledCanvasContainer ref={$canvas} />
 }
