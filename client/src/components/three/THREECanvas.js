@@ -83,6 +83,7 @@ const THREECanvas = () => {
   useEffect(() => {
     let mouse = new THREE.Vector2()
     let clicking = false
+    let openedAlbum = false
     /**
      * Scene Initial Status
      */
@@ -135,13 +136,18 @@ const THREECanvas = () => {
       const intersects = th.rayCaster.intersectObjects(sphereGroup, true)
 
       $canvas.current.style.cursor = "default"
-      if (clicking && intersects.length === 0) dispatch(setHoveredAlbum(null))
+
+      if (clicking && intersects.length === 0 && openedAlbum) {
+        openedAlbum = false
+        dispatch(setHoveredAlbum(null))
+      }
       for (var i = 0; i < intersects.length; i++) {
         // console.log("hovering", intersects[0].object.userData.album)
         $canvas.current.style.cursor = "pointer"
         if (clicking) {
           // console.log("clicking :", intersects[0].object.userData.album)
           dispatch(setHoveredAlbum(intersects[0].object.userData))
+          openedAlbum = true
           clicking = false
         }
       }

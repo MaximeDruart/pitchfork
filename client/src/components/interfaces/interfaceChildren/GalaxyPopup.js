@@ -1,7 +1,9 @@
 import React from "react"
 import styled from "styled-components"
+import { useSelector } from "react-redux"
 
 const StyledPopup = styled.div`
+  display: ${(props) => (props.show ? "block" : "none")};
   border: 1px solid red;
   width: 30vw;
   height: 30vh;
@@ -10,18 +12,19 @@ const StyledPopup = styled.div`
   z-index: 100;
 `
 
-const GalaxyPopup = ({ review }) => {
+const GalaxyPopup = () => {
+  const { hoveredAlbum } = useSelector((state) => state.interface)
   return (
-    <StyledPopup>
+    <StyledPopup show={!!hoveredAlbum}>
       <img className="album-cover" src="" alt="" />
       <div className="text-container">
-        <div className="album-name">{review.album}</div>
-        <div className="album-artist">{review.artist}</div>
+        <div className="album-name">{hoveredAlbum?.album}</div>
+        <div className="album-artist">{hoveredAlbum?.artist}</div>
         <div className="reviewer">
-          Reviewed by {review.author} on {review.date}
+          Reviewed by {hoveredAlbum?.author} on {hoveredAlbum?.date}
         </div>
-        <div className="score">{review.score}</div>
-        <a href={review.link}>Read on pitchfork</a>
+        <div className="score">{hoveredAlbum?.score}</div>
+        <a href={hoveredAlbum ? hoveredAlbum.link : "#"}>Read on pitchfork</a>
       </div>
     </StyledPopup>
   )

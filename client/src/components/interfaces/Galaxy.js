@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react"
+import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 import { getReviews, setPeriod, setGenres, setScores } from "../../redux/actions/apiActions"
@@ -9,7 +9,7 @@ const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 const Galaxy = () => {
   const dispatch = useDispatch()
 
-  const { reviews, loading, reviewsError, filteredGenres, filteredScores, filteredReviews, allGenres } = useSelector(
+  const { reviews, loading, reviewsError, filteredGenres, filteredScores, allGenres } = useSelector(
     (state) => state.api
   )
 

@@ -1,6 +1,6 @@
 import React from "react"
 import styled from "styled-components"
-import { Button, NavButton } from "../../assets/StyledComponents"
+import { NavButton } from "../../assets/StyledComponents"
 
 const IntroContainer = styled.div`
   z-index: 10;
@@ -15,7 +15,7 @@ const IntroContainer = styled.div`
   .text-container {
     margin-bottom: 15px;
     .over-title {
-      font-family: 'Noto Serif', serif;
+      font-family: "Noto Serif", serif;
       font-size: 20px;
     }
     .title {

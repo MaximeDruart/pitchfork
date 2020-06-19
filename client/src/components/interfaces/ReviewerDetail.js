@@ -25,7 +25,7 @@ const ReviewerDetail = () => {
   useEffect(() => {
     // only querying if data isnt already in store
     if (reviewers.length === 0) dispatch(getReviewers({}, ["reviewIds"]))
-  }, [dispatch])
+  }, [dispatch, reviewers.length])
 
   // GETTING URL REVIEWER INFO
   useEffect(() => {
@@ -57,6 +57,10 @@ const ReviewerDetail = () => {
     [reviewer]
   )
 
+  const changeReviewer = (direction) => {
+    // implement next / last reviewer
+  }
+
   return (
     <ReviewerContainer>
       {!loading && reviewers.length > 0 && (
@@ -65,15 +69,11 @@ const ReviewerDetail = () => {
       <div className="header">
         <div className="reviewer-name-container">
           <div className="previous">
-            <a href="#">
-              <img src={nextLeftButton}></img>
-            </a>
+            <img onClick={() => changeReviewer("previous")} src={nextLeftButton} alt=""></img>
           </div>
           {loading ? <div className="name-placeholder"></div> : <div className="name">{reviewer?.name}</div>}
           <div className="next">
-            <a href="#">
-              <img src={nextRightButton}></img>
-            </a>
+            <img onClick={() => changeReviewer("previous")} alt="" src={nextRightButton}></img>
           </div>
         </div>
         <Button onClick={() => setShowOverlay(true)} className="see-all-reviewers">
@@ -141,6 +141,7 @@ const ReviewerContainer = styled.div`
     }
     .previous,
     .next {
+      cursor: pointer;
       img {
         height: 30px;
         width: 30px;

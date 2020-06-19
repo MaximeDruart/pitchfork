@@ -1,5 +1,3 @@
-import * as THREE from "three"
-
 export const dateToYearPercent = (date) => {
   const months = [
     "January",

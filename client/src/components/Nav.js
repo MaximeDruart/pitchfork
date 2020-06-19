@@ -1,10 +1,8 @@
 import React from "react"
 import styled from "styled-components"
-import { useDispatch } from "react-redux"
 import { NavLink } from "react-router-dom"
 
 const Nav = () => {
-  const dispatch = useDispatch()
   return (
     <StyledNav>
       <div className="nav-elements">
