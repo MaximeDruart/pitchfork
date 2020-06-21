@@ -7,3 +7,8 @@ export const setZoomLevel = (payload) => ({
   type: "SET_ZOOM_LEVEL",
   payload,
 })
+
+export const setAlbumPosition = (payload) => ({
+  type: "SET_ALBUM_POSITION",
+  payload,
+})

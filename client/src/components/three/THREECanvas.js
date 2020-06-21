@@ -8,8 +8,7 @@ import styled from "styled-components"
 import { useSelector, useDispatch, shallowEqual } from "react-redux"
 import { useLocation } from "react-router-dom"
 import { dateToYearPercent, degToRad } from "./utils"
-import { setHoveredAlbum } from "../../redux/actions/interfaceActions"
-import { cloneDeep } from "lodash"
+import { setHoveredAlbum, setAlbumPosition } from "../../redux/actions/interfaceActions"
 import Stats from "stats.js"
 import { st } from "../../assets/StyledComponents"
 
@@ -27,13 +26,7 @@ const StyledCanvasContainer = styled.div`
   /* opacity: 0.4; */
 `
 
-const vizOptions = {
-  width: 70,
-  height: 16,
-  depth: 15,
-}
-
-const fov = 80
+const fov = 60
 
 const th = {
   scene: new THREE.Scene(),
@@ -50,11 +43,22 @@ const th = {
   controls: "",
   tbcontrols: "",
   sphere: {
-    geometry: new THREE.SphereGeometry(0.2, 12, 12),
+    geometry: new THREE.SphereGeometry(0.25, 12, 12),
     material: new THREE.MeshLambertMaterial(),
   },
   sphereGroup: "",
   filteredSphereGroup: "",
+  sceneSize: {
+    width: 70,
+    height: 16,
+    depth: 40, // keeping a 50th of sampleSize seems good
+  },
+  fog: {
+    near: 10,
+    far: 19.5,
+    color: 0x99000000,
+  },
+  sphereYs: [],
 }
 th.cameraHelper = new THREE.CameraHelper(th.camera)
 th.sphere.mesh = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
@@ -136,6 +140,7 @@ const THREECanvas = () => {
      * Scene Initial Status
      */
 
+    th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
     th.camera.position.set(0, 0, 0)
 
     toggleHelp(true)
@@ -144,16 +149,12 @@ const THREECanvas = () => {
       // toggleTrackBallControls(true)
       th.controls &&
         th.controls.addEventListener("change", () => {
+          // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
+          th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
           // update timeline
         })
     }, 100)
 
-    {
-      const color = 0x99000000 // black
-      const near = 10
-      const far = 20
-      th.scene.fog = new THREE.Fog(color, near, far)
-    }
     /**
      * Raycasting
      */
@@ -170,9 +171,9 @@ const THREECanvas = () => {
      * Lighting
      */
 
-    const hemiLight = new THREE.HemisphereLight("red", "blue", 0.6)
+    const hemiLight = new THREE.HemisphereLight("red", "blue", 0.38)
     th.scene.add(hemiLight)
-    const ambientLight = new THREE.AmbientLight("white", 0.4)
+    const ambientLight = new THREE.AmbientLight("white", 0.59)
     th.scene.add(ambientLight)
 
     /**
@@ -202,27 +203,33 @@ const THREECanvas = () => {
       if (clicking && intersects.length === 0 && openedAlbum) {
         openedAlbum = false
         dispatch(setHoveredAlbum(null))
+        dispatch(setAlbumPosition(null))
       }
       for (var i = 0; i < intersects.length; i++) {
         if (intersects[0].object.material.opacity >= 1) {
           $canvas.current.style.cursor = "pointer"
           if (clicking) {
             dispatch(setHoveredAlbum(intersects[0].object.userData))
+            // converting 3d world pos to 2d screen pos
+            let vector = intersects[0].object.position.project(th.camera)
+            vector.x = ((vector.x + 1) * window.screen.width) / 2
+            vector.y = (-(vector.y - 1) * window.screen.height) / 2
+            dispatch(setAlbumPosition([vector.x, vector.y]))
             openedAlbum = true
             clicking = false
           }
         }
       }
 
-      // i++
       // setTimeout(() => {
-      //   if (th.filteredSphereGroup?.children?.length > 0) {
-      //     th.filteredSphereGroup.children.forEach((sphere) => {
-      //       sphere.position.x += i / 100
+      //   if (th.sphereGroup?.children?.length > 0) {
+      //     th.sphereGroup.children.forEach((sphere, index) => {
+      //       sphere.position.y = th.sphereYs[index] + Math.sin(t / 500) / sphere.userData.random
       //     })
       //   }
       // }, 5000)
 
+      if (th.sphereGroup.position) th.sphereGroup.position.y = Math.sin(t / 500) / 50
       // th.sphereInstancedMesh.instanceMatrix.needsUpdate = true
 
       th.renderer.render(th.scene, th.camera)
@@ -262,12 +269,18 @@ const THREECanvas = () => {
           const dateComputed = gsap.utils.mapRange(
             0,
             19,
-            -vizOptions.width / 2,
-            vizOptions.width / 2,
+            -th.sceneSize.width / 2,
+            th.sceneSize.width / 2,
             dateToYearPercent(review.date)
           )
-          const scoreComputed = gsap.utils.mapRange(1, 10, -vizOptions.height / 2, vizOptions.height / 2, review.score)
-          const depthComputed = -Math.random() * vizOptions.depth
+          const scoreComputed = gsap.utils.mapRange(
+            1,
+            10,
+            -th.sceneSize.height / 2,
+            th.sceneSize.height / 2,
+            review.score
+          )
+          const depthComputed = -Math.random() * th.sceneSize.depth
           const sphere = new THREE.Mesh(
             th.sphere.geometry,
             // new THREE.MeshLambertMaterial({ color: st.genresColors[review.genre], transparent: true, opacity: 1 })
@@ -279,6 +292,7 @@ const THREECanvas = () => {
               // emissiveIntensity: 1.5,
             })
           )
+          th.sphereYs.push(scoreComputed)
           sphere.position.set(dateComputed, scoreComputed, depthComputed)
           sphere.userData = { ...review }
           sphereGroup.add(sphere)
@@ -312,7 +326,7 @@ const THREECanvas = () => {
   useEffect(() => {
     // if albums have been fetched and the initial sphere render is done
 
-    // inplementing debouncing to that the expensive
+    // inplementing debouncing to that the expensive search op is executed less often
     if (pathname === "/galaxy") {
       const timeDiff = Date.now() - lastUpdate
       setLastUpdate(Date.now())
@@ -322,7 +336,7 @@ const THREECanvas = () => {
           gsap.to(sphere.material, {
             duration: 0.8,
             ease: "Power2.easeOut",
-            opacity: albumNames.includes(sphere.userData.album) ? 1 : 0.2,
+            opacity: albumNames.includes(sphere.userData.album) ? 1 : 0.16,
           })
         })
       }
@@ -337,7 +351,7 @@ const THREECanvas = () => {
     // adjust camera zoom
 
     // get the range ( percent of width), mutliply it by width, then divide it by 2 coz we need a triangle for trigo
-    let testY = ((zoom[1] - zoom[0]) * vizOptions.width) / 100
+    let testY = ((zoom[1] - zoom[0]) * th.sceneSize.width) / 100
     testY = testY / 2
 
     const tanRad = Math.tan(degToRad(fov / 2))

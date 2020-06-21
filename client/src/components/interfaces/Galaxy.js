@@ -37,7 +37,8 @@ const Galaxy = () => {
   const zoom = useSelector((state) => state.interface.zoom)
 
   useEffect(() => {
-    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"], 500))
+    const sampleSize = 2000
+    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"], sampleSize))
   }, [reviews, dispatch])
 
   const updateScores = (scoreToUpdate) => {
