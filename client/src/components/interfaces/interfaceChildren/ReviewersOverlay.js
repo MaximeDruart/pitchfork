@@ -7,32 +7,38 @@ import nextLeftButton from "../../../assets/icons/next-left.svg"
 const StyledOverlay = styled.div`
   display: ${(props) => (props.show ? "block" : "none")};
   height: 100vh;
-  .header {
+  .container{
     display: flex;
     flex-direction: column;
+    margin: 0 auto;
     width: 1100px;
-    .filters {
+    .filters{
       display: flex;
       justify-content: space-between;
       flex-direction: row;
       width: 1100px;
       margin: 0 auto;
       text-transform: uppercase;
+      font-weight: 300;
+      letter-spacing: 4px;
       .right {
         display: flex;
         justify-content: space-between;
         width: 400px;
-      }
-    }
-    .goBack{
-      img{
-        height: 30px;
-        width: 30px;
-        color: white;
-        cursor: pointer;
-      }
+        align-self: flex-end;      }
     }
   }
+  .goBack{
+    img{
+      height: 25px;
+      width: 25px;
+      color: white;
+      cursor: pointer;
+      margin-top: 30px;
+      margin-bottom: 50px;
+    }
+  }
+}
 
   .reviewers {
     .reviewer {
@@ -88,14 +94,16 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
   return (
     <StyledOverlay show={show}>
       <div className="header">
-        <div className="goBack">
-          <img onClick={() => setShow(false)} src={nextLeftButton}></img>
-        </div>
-        <div className="filters">
-          <div className="left">filter names</div>
-          <div className="right">
-            <div>select genres</div>
-            <div>number of reviews</div>
+        <div className="container">
+          <div className="goBack">
+            <img onClick={() => setShow(false)} src={nextLeftButton}></img>
+          </div>
+          <div className="filters">
+            <div className="left">filter names</div>
+            <div className="right">
+              <div>select genres</div>
+              <div>number of reviews</div>
+            </div>
           </div>
         </div>
       </div>
