@@ -24,13 +24,14 @@ const IntroContainer = styled.div`
       font-size: 120px;
       text-transform: uppercase;
       line-height: 1;
-      font-weight: bold;
+      font-family: "Oswald-Bold";
     }
     .under-title {
       font-weight: 200;
       font-size: 28px;
       margin-top: 30px;
       padding-bottom: 30px;
+      font-family: "Oswald-Light";
     }
   }
   .intro-button {

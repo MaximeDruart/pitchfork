@@ -22,15 +22,19 @@ export const fetchReviewsError = (error) => {
     error,
   }
 }
-export const getReviews = (filters = {}, exclusions = [], limit = null) => {
+export const getReviews = (filters = {}, exclusions = [], sampleSize = 8500) => {
   return (dispatch) => {
     dispatch(fetchReviewsRequest())
     axios
-      .post("http://localhost:3001/reviews/find", {
-        filters,
+      .post("http://localhost:3001/reviews/find/agg", {
         exclusions,
-        limit: limit,
+        sampleSize,
       })
+      // .post("http://localhost:3001/reviews/find", {
+      //   filters,
+      //   exclusions,
+      //   limit: limit,
+      // })
       .then((response) => {
         dispatch(fetchReviewsSuccess(response.data))
       })

@@ -4,6 +4,36 @@
   box-sizing: border-box;
 }
 
+@font-face {
+  font-family: "Oswald-ExtraLight";
+  src: url("./assets/fonts/Oswald-ExtraLight.ttf");
+}
+
+@font-face {
+  font-family: "Oswald-Light";
+  src: url("./assets/fonts/Oswald-Light.ttf");
+}
+
+@font-face {
+  font-family: "Oswald-Regular";
+  src: url("./assets/fonts/Oswald-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Oswald-Medium";
+  src: url("./assets/fonts/Oswald-Medium.ttf");
+}
+
+@font-face {
+  font-family: "Oswald-SemiBold";
+  src: url("./assets/fonts/Oswald-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "Oswald-Bold";
+  src: url("./assets/fonts/Oswald-Bold.ttf");
+}
+
 html,
 body {
   width: 100vw;
@@ -12,6 +42,7 @@ body {
   overflow: hidden;
   padding: 0;
   margin: 0;
+  background: black;
 }
 
 .app {
@@ -20,6 +51,6 @@ body {
   position: fixed;
   overflow: hidden;
   * {
-    font-family: "Oswald";
+    font-family: "Oswald-Regular";
   }
 }

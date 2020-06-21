@@ -1,15 +1,17 @@
 import React, { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js"
 import gsap from "gsap"
 import ThreePlugin from "./GSAPTHREE"
 import styled from "styled-components"
 import { useSelector, useDispatch, shallowEqual } from "react-redux"
 import { useLocation } from "react-router-dom"
-import { dateToYearPercent, radToDeg, degToRad } from "./utils"
+import { dateToYearPercent, degToRad } from "./utils"
 import { setHoveredAlbum } from "../../redux/actions/interfaceActions"
 import { cloneDeep } from "lodash"
 import Stats from "stats.js"
+import { st } from "../../assets/StyledComponents"
 
 const stats = new Stats()
 stats.showPanel(0)
@@ -28,7 +30,7 @@ const StyledCanvasContainer = styled.div`
 const vizOptions = {
   width: 70,
   height: 16,
-  depth: 60,
+  depth: 15,
 }
 
 const fov = 80
@@ -46,9 +48,10 @@ const th = {
   polarGridHelper: new THREE.PolarGridHelper(),
 
   controls: "",
+  tbcontrols: "",
   sphere: {
     geometry: new THREE.SphereGeometry(0.2, 12, 12),
-    material: new THREE.MeshPhongMaterial(),
+    material: new THREE.MeshLambertMaterial(),
   },
   sphereGroup: "",
   filteredSphereGroup: "",
@@ -65,6 +68,8 @@ const THREECanvas = () => {
   const loading = useSelector((state) => state.api.loading, shallowEqual)
   const filteredReviews = useSelector((state) => state.api.filteredReviews, shallowEqual)
 
+  const [spawnDone, setSpawnDone] = useState(false)
+
   // const { loading, filteredReviews } = useSelector(
   //   (state) => ({
   //     loading: state.api.loading,
@@ -77,16 +82,34 @@ const THREECanvas = () => {
   const dispatch = useDispatch()
   const [lastUpdate, setLastUpdate] = useState(Date.now())
 
-  const toggleControls = (isTrue) => {
+  const toggleOrbitControls = (isTrue) => {
     if (isTrue) {
       if (!th.controls) {
         th.controls = new OrbitControls(th.camera, th.renderer.domElement)
         th.controls.enableDamping = true
+        th.controls.enableRotate = false
+        th.controls.mouseButtons.LEFT = THREE.MOUSE.PAN
+        th.controls.mouseButtons.RIGHT = null
+        // th.controls.screenSpacePanning = true
+
         th.controls.maxDistance = 50
         th.controls.minDistance = 5
         th.controls.dampingFactor = 0.05
       }
     } else th.controls = null
+  }
+
+  const toggleTrackBallControls = (isTrue = true) => {
+    th.tbcontrols = new TrackballControls(th.camera, th.renderer.domElement)
+    th.tbcontrols.mouseButtons.LEFT = THREE.MOUSE.PAN
+    th.tbcontrols.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
+    th.tbcontrols.rotateSpeed = 0.8
+    th.tbcontrols.zoomSpeed = 1
+    th.tbcontrols.panSpeed = 0.4
+    th.tbcontrols.noRotate = true
+    // th.tbcontrols.dynamicDampingFactor = 2
+
+    th.tbcontrols.keys = [65, 83, 68]
   }
 
   const toggleHelp = (isTrue) => {
@@ -117,18 +140,20 @@ const THREECanvas = () => {
 
     toggleHelp(true)
     setTimeout(() => {
-      // toggleControls(true)
-    }, 4000)
-    console.log(th.camera.position)
-    // th.camera.lookAt(th.scene)
+      toggleOrbitControls(true)
+      // toggleTrackBallControls(true)
+      th.controls &&
+        th.controls.addEventListener("change", () => {
+          // update timeline
+        })
+    }, 100)
 
     {
       const color = 0x99000000 // black
       const near = 10
-      const far = 40
-      // th.scene.fog = new THREE.Fog(color, near, far)
+      const far = 20
+      th.scene.fog = new THREE.Fog(color, near, far)
     }
-
     /**
      * Raycasting
      */
@@ -145,8 +170,10 @@ const THREECanvas = () => {
      * Lighting
      */
 
-    const hemiLight = new THREE.HemisphereLight("red", "blue")
+    const hemiLight = new THREE.HemisphereLight("red", "blue", 0.6)
     th.scene.add(hemiLight)
+    const ambientLight = new THREE.AmbientLight("white", 0.4)
+    th.scene.add(ambientLight)
 
     /**
      * Renderer
@@ -162,6 +189,7 @@ const THREECanvas = () => {
 
       // camera movements
       th.controls && th.controls.update()
+      th.tbcontrols && th.tbcontrols.update()
 
       // update the picking ray with the camera and mouse position
       th.rayCaster.setFromCamera(mouse, th.camera)
@@ -176,13 +204,13 @@ const THREECanvas = () => {
         dispatch(setHoveredAlbum(null))
       }
       for (var i = 0; i < intersects.length; i++) {
-        // console.log("hovering", intersects[0].object.userData.album)
-        $canvas.current.style.cursor = "pointer"
-        if (clicking) {
-          // console.log("clicking :", intersects[0].object.userData.album)
-          dispatch(setHoveredAlbum(intersects[0].object.userData))
-          openedAlbum = true
-          clicking = false
+        if (intersects[0].object.material.opacity >= 1) {
+          $canvas.current.style.cursor = "pointer"
+          if (clicking) {
+            dispatch(setHoveredAlbum(intersects[0].object.userData))
+            openedAlbum = true
+            clicking = false
+          }
         }
       }
 
@@ -229,6 +257,7 @@ const THREECanvas = () => {
       const createSpheres = () => {
         const sphereGroup = new THREE.Group()
         sphereGroup.name = "sphereGroup"
+
         filteredReviews.forEach((review) => {
           const dateComputed = gsap.utils.mapRange(
             0,
@@ -239,7 +268,17 @@ const THREECanvas = () => {
           )
           const scoreComputed = gsap.utils.mapRange(1, 10, -vizOptions.height / 2, vizOptions.height / 2, review.score)
           const depthComputed = -Math.random() * vizOptions.depth
-          const sphere = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
+          const sphere = new THREE.Mesh(
+            th.sphere.geometry,
+            // new THREE.MeshLambertMaterial({ color: st.genresColors[review.genre], transparent: true, opacity: 1 })
+            new THREE.MeshPhongMaterial({
+              color: st.genresColors[review.genre],
+              transparent: true,
+              opacity: 0,
+              // emissive: st.genresColors[review.genre],
+              // emissiveIntensity: 1.5,
+            })
+          )
           sphere.position.set(dateComputed, scoreComputed, depthComputed)
           sphere.userData = { ...review }
           sphereGroup.add(sphere)
@@ -253,6 +292,9 @@ const THREECanvas = () => {
       // th.sphereGroup = tempGrp
       // th.filteredSphereGroup = cloneDeep(tempGrp)
       th.scene.add(th.sphereGroup)
+      // gsap.to(th.sphereGroup.children)
+      const materials = th.sphereGroup.children.map((child) => child.material)
+      gsap.to(materials, { opacity: 1, stagger: { amount: 1.2 }, duration: 0.5, onComplete: () => setSpawnDone(true) })
 
       /** Instanced mesh approach, thing is you can't store data for each individual instance. Not even sure that it's better performance wise */
       // th.scene.add(th.sphereInstancedMesh)
@@ -274,10 +316,14 @@ const THREECanvas = () => {
     if (pathname === "/galaxy") {
       const timeDiff = Date.now() - lastUpdate
       setLastUpdate(Date.now())
-      if (reviews.length > 0 && !loading) {
+      if (reviews.length > 0 && !loading && spawnDone) {
         const albumNames = filteredReviews.map((review) => review.album)
         th.sphereGroup.children.forEach((sphere) => {
-          sphere.visible = albumNames.includes(sphere.userData.album)
+          gsap.to(sphere.material, {
+            duration: 0.8,
+            ease: "Power2.easeOut",
+            opacity: albumNames.includes(sphere.userData.album) ? 1 : 0.2,
+          })
         })
       }
     } else if (pathname.includes("/reviewer")) {

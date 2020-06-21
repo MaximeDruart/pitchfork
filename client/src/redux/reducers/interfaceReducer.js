@@ -1,6 +1,6 @@
 const initialState = {
   hoveredAlbum: "",
-  zoom: [20, 80],
+  zoom: [50, 60],
 }
 
 export default (state = initialState, { type, payload }) => {

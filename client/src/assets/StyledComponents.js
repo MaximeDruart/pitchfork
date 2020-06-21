@@ -5,7 +5,7 @@ export const st = {
   gradient: "linear-gradient(90deg, rgba(124,27,248,1) 0%, rgba(248,40,78,1) 100%)",
   background: "#212029",
   fzSmall: "1rem",
-  fzMedium: "1.4rem",
+  fzMedium: "1.2rem",
   fzLarge: "2.3rem",
   txtGrey: "#868686",
   genresColors: {
