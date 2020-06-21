@@ -25,8 +25,19 @@ RETURNS review objects filtered
 router.post("/find", (req, res) => {
   if (req.body.filters.date) req.body.filters.date = { $regex: new RegExp(req.body.filters.date) }
   Review.find(req.body.filters, getExclusionObject(req.body.exclusions))
-    // .limit(2000)
+    .limit(req.body.limit ? req.body.limit : 10000)
     .then((reviews) => (reviews.length > 0 ? res.json(reviews) : res.status(404).json("No reviews found for filters")))
+    .catch((err) => res.status(400).json({ err }))
+})
+
+router.post("/find/agg", (req, res) => {
+  Review.aggregate([{ $project: getExclusionObject(req.body.exclusions) }])
+    .sample(req.body.sampleSize)
+    .then((reviews) => {
+      // filtering out potential duplicates because sample can return duplicate fields (idk why)
+      const revTemp = reviews.filter((review, index) => reviews.indexOf(review.id) !== index)
+      return reviews.length > 0 ? res.json(revTemp) : res.status(404).json("No reviews found for filters")
+    })
     .catch((err) => res.status(400).json({ err }))
 })
 

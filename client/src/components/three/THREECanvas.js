@@ -35,7 +35,7 @@ const fov = 80
 
 const th = {
   scene: new THREE.Scene(),
-  camera: new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 60),
+  camera: new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 80),
   renderer: new THREE.WebGLRenderer({
     alpha: false,
     antialias: true,
@@ -54,6 +54,7 @@ const th = {
   filteredSphereGroup: "",
 }
 th.cameraHelper = new THREE.CameraHelper(th.camera)
+th.sphere.mesh = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
 
 // th.sphereInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
@@ -125,7 +126,7 @@ const THREECanvas = () => {
       const color = 0x99000000 // black
       const near = 10
       const far = 40
-      th.scene.fog = new THREE.Fog(color, near, far)
+      // th.scene.fog = new THREE.Fog(color, near, far)
     }
 
     /**
@@ -185,14 +186,14 @@ const THREECanvas = () => {
         }
       }
 
-      i++
-      setTimeout(() => {
-        if (th.filteredSphereGroup?.children?.length > 0) {
-          th.filteredSphereGroup.children.forEach((sphere) => {
-            sphere.position.x += i / 100
-          })
-        }
-      }, 5000)
+      // i++
+      // setTimeout(() => {
+      //   if (th.filteredSphereGroup?.children?.length > 0) {
+      //     th.filteredSphereGroup.children.forEach((sphere) => {
+      //       sphere.position.x += i / 100
+      //     })
+      //   }
+      // }, 5000)
 
       // th.sphereInstancedMesh.instanceMatrix.needsUpdate = true
 
@@ -248,10 +249,10 @@ const THREECanvas = () => {
 
       console.log("running create sphere")
 
-      let tempGrp = createSpheres()
-      th.sphereGroup = tempGrp
-      th.filteredSphereGroup = cloneDeep(tempGrp)
-      th.scene.add(th.filteredSphereGroup)
+      th.sphereGroup = createSpheres()
+      // th.sphereGroup = tempGrp
+      // th.filteredSphereGroup = cloneDeep(tempGrp)
+      th.scene.add(th.sphereGroup)
 
       /** Instanced mesh approach, thing is you can't store data for each individual instance. Not even sure that it's better performance wise */
       // th.scene.add(th.sphereInstancedMesh)
@@ -273,16 +274,17 @@ const THREECanvas = () => {
     if (pathname === "/galaxy") {
       const timeDiff = Date.now() - lastUpdate
       setLastUpdate(Date.now())
-      if (reviews.length > 0 && !loading && timeDiff > 800) {
-        console.log("updating", filteredReviews.length)
-
+      if (reviews.length > 0 && !loading) {
         const albumNames = filteredReviews.map((review) => review.album)
-        th.filteredSphereGroup.children = th.sphereGroup.children.filter((sphere) =>
-          albumNames.includes(sphere.userData.album)
-        )
+        th.sphereGroup.children.forEach((sphere) => {
+          sphere.visible = albumNames.includes(sphere.userData.album)
+        })
       }
+    } else if (pathname.includes("/reviewer")) {
     }
   }, [filteredReviews])
+
+  // const removeChildren = () => while(th.scene.children.length) th.scene.remove()
 
   // camera movements in galaxy
   useEffect(() => {
@@ -296,7 +298,6 @@ const THREECanvas = () => {
     const tanDeg = tanRad
     // const cameraZ = (rangeMappedToRealWorld[1] - rangeMappedToRealWorld[0]) / tanDeg
     const cameraZ = testY / tanDeg
-    console.log(cameraZ)
     th.camera.position.z = cameraZ
     th.camera.updateProjectionMatrix()
   }, [zoom])
@@ -326,4 +327,4 @@ const THREECanvas = () => {
   return <StyledCanvasContainer ref={$canvas} />
 }
 
-export default THREECanvas
+export default React.memo(THREECanvas)

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useDispatch, useSelector, shallowEqual } from "react-redux"
-import { getReviews, setPeriod, setGenres, setScores } from "../../redux/actions/apiActions"
+import { getReviews, setGenres, setScores } from "../../redux/actions/apiActions"
 import styled from "styled-components"
 import { st } from "../../assets/StyledComponents"
 import GalaxySearchBar from "./interfaceChildren/GalaxySearchBar"
@@ -32,7 +32,7 @@ const Galaxy = () => {
   const zoom = useSelector((state) => state.interface.zoom)
 
   useEffect(() => {
-    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"]))
+    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"], 5000))
   }, [reviews, dispatch])
 
   const updateScores = (scoreToUpdate) => {

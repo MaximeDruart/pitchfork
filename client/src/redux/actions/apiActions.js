@@ -22,13 +22,14 @@ export const fetchReviewsError = (error) => {
     error,
   }
 }
-export const getReviews = (filters = {}, exclusions = []) => {
+export const getReviews = (filters = {}, exclusions = [], limit = null) => {
   return (dispatch) => {
     dispatch(fetchReviewsRequest())
     axios
       .post("http://localhost:3001/reviews/find", {
         filters,
         exclusions,
+        limit: limit,
       })
       .then((response) => {
         dispatch(fetchReviewsSuccess(response.data))

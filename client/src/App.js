@@ -12,6 +12,7 @@ import GalaxyPopup from "./components/interfaces/interfaceChildren/GalaxyPopup"
 const App = () => {
   const { pathname } = useLocation()
 
+  console.log("running app")
   return (
     <div className="app">
       {/* SCENE COMPONENTS */}
