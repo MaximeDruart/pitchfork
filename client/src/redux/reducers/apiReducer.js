@@ -2,11 +2,18 @@ const allGenres = ["Rock", "Rap", "Electronic", "Experimental", "Pop/R&B", "Meta
 const scores = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 let newFiltered
 
-const updateFilteredReviews = ({ reviews, filteredGenres, filteredScores }) => {
+const updateFilteredReviews = ({ reviews, filteredGenres, filteredScores, filteredSearch }) => {
   return reviews.filter((review) => {
     if (filteredGenres.includes(review.genre)) {
       if (filteredScores.includes(Math.floor(review.score))) {
-        return true
+        // if less than 2 chars in searchbar ignore it
+        if (filteredSearch.length < 2) return true
+        if (
+          review.album.toLowerCase().includes(filteredSearch) ||
+          review.artist.toLowerCase().includes(filteredSearch)
+        ) {
+          return true
+        }
       }
     }
     return false
@@ -23,7 +30,8 @@ const initialState = {
   allGenres,
   filteredGenres: allGenres,
   filteredScores: scores,
-  filteredPeriod: [0, 100],
+  filteredSearch: "",
+  filteredPeriod: [20, 80],
 }
 
 const apiReducer = (state = initialState, action) => {
@@ -89,6 +97,7 @@ const apiReducer = (state = initialState, action) => {
     case "SET_GENRES":
       newFiltered = updateFilteredReviews({
         reviews: state.reviews,
+        filteredSearch: state.filteredSearch,
         filteredGenres: action.payload,
         filteredScores: state.filteredScores,
       })
@@ -97,10 +106,20 @@ const apiReducer = (state = initialState, action) => {
     case "SET_SCORES":
       newFiltered = updateFilteredReviews({
         reviews: state.reviews,
+        filteredSearch: state.filteredSearch,
         filteredGenres: state.filteredGenres,
         filteredScores: action.payload,
       })
       return { ...state, filteredScores: action.payload, filteredReviews: newFiltered }
+
+    case "SET_SEARCH":
+      newFiltered = updateFilteredReviews({
+        reviews: state.reviews,
+        filteredSearch: action.payload,
+        filteredGenres: state.filteredGenres,
+        filteredScores: state.filteredScores,
+      })
+      return { ...state, filteredSearch: action.payload, filteredReviews: newFiltered }
 
     default:
       return state

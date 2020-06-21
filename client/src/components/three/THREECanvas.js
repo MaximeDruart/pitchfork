@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import gsap from "gsap"
@@ -6,7 +6,7 @@ import ThreePlugin from "./GSAPTHREE"
 import styled from "styled-components"
 import { useSelector, useDispatch } from "react-redux"
 import { useLocation } from "react-router-dom"
-import { dateToYearPercent } from "./utils"
+import { dateToYearPercent, radToDeg, degToRad } from "./utils"
 import { setHoveredAlbum } from "../../redux/actions/interfaceActions"
 import { cloneDeep } from "lodash"
 
@@ -26,9 +26,11 @@ const vizOptions = {
   depth: 60,
 }
 
+const fov = 80
+
 const th = {
   scene: new THREE.Scene(),
-  camera: new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500),
+  camera: new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 150),
   renderer: new THREE.WebGLRenderer({
     alpha: false,
     antialias: false,
@@ -46,14 +48,16 @@ const th = {
   sphereGroup: "",
   filteredSphereGroup: "",
 }
+th.cameraHelper = new THREE.CameraHelper(th.camera)
 
 // th.sphereInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
 const THREECanvas = () => {
   const $canvas = useRef(null)
-  const { loading, reviews, filteredReviews } = useSelector((state) => state.api)
+  const { loading, reviews, filteredReviews, filteredPeriod } = useSelector((state) => state.api)
   const { pathname } = useLocation()
   const dispatch = useDispatch()
+  const [lastUpdate, setLastUpdate] = useState(Date.now())
 
   const toggleControls = (isTrue) => {
     if (isTrue) {
@@ -71,31 +75,40 @@ const THREECanvas = () => {
     if (isTrue) {
       th.scene.add(th.axesHelper)
       th.scene.add(th.gridHelper)
+      th.scene.add(th.cameraHelper)
       // th.scene.add(th.polarGridHelper)
     } else {
       th.scene.remove(th.axesHelper)
       th.scene.remove(th.gridHelper)
+      th.scene.add(th.cameraHelper)
       // th.scene.remove(th.polarGridHelper)
     }
   }
 
   // threejs scene
   useEffect(() => {
+    console.log("running scene")
     let mouse = new THREE.Vector2()
     let clicking = false
     let openedAlbum = false
     /**
      * Scene Initial Status
      */
+
+    th.camera.position.set(0, 0, 0)
+
     toggleHelp(true)
-    toggleControls(true)
-    th.camera.position.z = 15
+    setTimeout(() => {
+      // toggleControls(true)
+    }, 4000)
+    console.log(th.camera.position)
+    // th.camera.lookAt(th.scene)
 
     {
-      const color = 0x000000 // black
+      const color = 0x99000000 // black
       const near = 10
-      const far = 25
-      th.scene.fog = new THREE.Fog(color, near, far)
+      const far = 40
+      // th.scene.fog = new THREE.Fog(color, near, far)
     }
 
     /**
@@ -177,7 +190,7 @@ const THREECanvas = () => {
     }
   }, [])
 
-  // threejs updates
+  // threejs scene starts
   useEffect(() => {
     // aka page galaxy has just finished loading and querying reviews
     if (pathname === "/galaxy" && !loading && reviews.length > 0) {
@@ -185,9 +198,9 @@ const THREECanvas = () => {
         const sphereGroup = new THREE.Group()
         sphereGroup.name = "sphereGroup"
         filteredReviews.forEach((review) => {
-          const dateNumber = gsap.utils.mapRange(
+          const dateComputed = gsap.utils.mapRange(
             0,
-            20,
+            19,
             -vizOptions.width / 2,
             vizOptions.width / 2,
             dateToYearPercent(review.date)
@@ -195,12 +208,14 @@ const THREECanvas = () => {
           const scoreComputed = gsap.utils.mapRange(1, 10, -vizOptions.height / 2, vizOptions.height / 2, review.score)
           const depthComputed = -Math.random() * vizOptions.depth
           const sphere = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
-          sphere.position.set(dateNumber, scoreComputed, depthComputed)
+          sphere.position.set(dateComputed, scoreComputed, 0)
           sphere.userData = { ...review }
           sphereGroup.add(sphere)
         })
         return sphereGroup
       }
+
+      console.log("running create sphere")
 
       let tempGrp = createSpheres()
       th.sphereGroup = tempGrp
@@ -219,16 +234,50 @@ const THREECanvas = () => {
     }
   }, [reviews])
 
-  // updating reviews with new filters
+  // updating reviews with new filters in galaxy
   useEffect(() => {
     // if albums have been fetched and the initial sphere render is done
-    if (reviews.length > 0 && !loading) {
+
+    // inplementing debouncing to that the expensive
+    const timeDiff = Date.now() - lastUpdate
+    setLastUpdate(Date.now())
+    if (reviews.length > 0 && !loading && timeDiff > 800) {
+      console.log("updating", filteredReviews.length)
+
       const albumNames = filteredReviews.map((review) => review.album)
       th.filteredSphereGroup.children = th.sphereGroup.children.filter((sphere) =>
         albumNames.includes(sphere.userData.album)
       )
     }
   }, [filteredReviews])
+
+  // camera movements in galaxy
+  useEffect(() => {
+    // adjust camera zoom
+
+    // period is stored as 0 to 100 data and needs to be transcribed to the width of our 3d "cube" of spheres
+    // const rangeMappedToRealWorld = [
+    //   gsap.utils.mapRange(0, 100, -vizOptions.width / 2, vizOptions.width / 2, filteredPeriod[0]),
+    //   gsap.utils.mapRange(0, 100, -vizOptions.width / 2, vizOptions.width / 2, filteredPeriod[1]),
+    // ]
+
+    const rangeMappedToRealWorld = [
+      gsap.utils.mapRange(0, 100, 0, vizOptions.width, filteredPeriod[0]),
+      gsap.utils.mapRange(0, 100, 0, vizOptions.width, filteredPeriod[1]),
+    ]
+
+    // get the range ( percent of width), mutliply it by width, then divide it by 2 coz we need a triangle for trigo
+    let testY = ((filteredPeriod[1] - filteredPeriod[0]) * vizOptions.width) / 100
+    testY = testY / 2
+
+    const tanRad = Math.tan(degToRad(fov / 2))
+    const tanDeg = tanRad
+    // const cameraZ = (rangeMappedToRealWorld[1] - rangeMappedToRealWorld[0]) / tanDeg
+    const cameraZ = testY / tanDeg
+    console.log(cameraZ)
+    th.camera.position.z = cameraZ
+    th.camera.updateProjectionMatrix()
+  }, [filteredPeriod])
 
   // useEffect(() => {
   //   if (!loading && reviews.length > 0) {

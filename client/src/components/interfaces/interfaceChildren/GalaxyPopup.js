@@ -10,6 +10,8 @@ const StyledPopup = styled.div`
   background: black;
   color: white;
   z-index: 100;
+  position: absolute;
+  right: 0;
 `
 
 const GalaxyPopup = () => {

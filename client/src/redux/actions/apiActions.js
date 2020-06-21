@@ -94,3 +94,11 @@ export const setScores = (payload) => ({
   type: "SET_SCORES",
   payload,
 })
+
+export const setSearch = (payload) => {
+  console.log("action triggered")
+  return {
+    type: "SET_SEARCH",
+    payload,
+  }
+}

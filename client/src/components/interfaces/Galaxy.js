@@ -1,20 +1,36 @@
 import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-
 import { getReviews, setPeriod, setGenres, setScores } from "../../redux/actions/apiActions"
 import styled from "styled-components"
 import { st } from "../../assets/StyledComponents"
+import GalaxySearchBar from "./interfaceChildren/GalaxySearchBar"
+import Slider from "@material-ui/core/Slider"
+import gsap from "gsap"
+import rangeSvg from "../../assets/icons/range.svg"
+import dotsSvg from "../../assets/icons/dots.svg"
 
 const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+const getPeriodRange = ([a, b]) => [
+  Math.floor(gsap.utils.mapRange(0, 100, 1999, 2019, a)),
+  Math.floor(gsap.utils.mapRange(0, 100, 1999, 2019, b)),
+]
+
+const getClipPath = (filteredPeriod) => {
+  const leftStr = filteredPeriod[0] + "%"
+  const rightStr = filteredPeriod[1] + "%"
+  return `polygon(${leftStr} 0%, ${rightStr} 0%, ${rightStr} 100%, ${leftStr} 100%)`
+}
+
 const Galaxy = () => {
   const dispatch = useDispatch()
 
-  const { reviews, loading, reviewsError, filteredGenres, filteredScores, allGenres } = useSelector(
+  const { reviews, loading, reviewsError, filteredPeriod, filteredGenres, filteredScores, allGenres } = useSelector(
     (state) => state.api
   )
 
   useEffect(() => {
-    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"]))
+    if (reviews.length === 0) dispatch(getReviews({ genre: "Rock" }, ["review", "role", "bnm", "id"]))
   }, [reviews, dispatch])
 
   useEffect(() => {
@@ -56,6 +72,14 @@ const Galaxy = () => {
     dispatch(setGenres(newGenres))
   }
 
+  const updatePeriod = (event, newValue) => {
+    let difference = 20
+    let clampedValue = newValue
+    // need to restrain the value so the range doesn't get too small
+    // if (newValue[1] - difference - newValue[0] < 0) clampedValue = [newValue[0], newValue[1]]
+    dispatch(setPeriod(clampedValue))
+  }
+
   const mappedScore = () =>
     oto10.map((score, index) => (
       <StyledScoreItem
@@ -82,7 +106,8 @@ const Galaxy = () => {
     ))
 
   return (
-    <StyledGalaxy>
+    <StyledGalaxy polygon={getClipPath(filteredPeriod)}>
+      <GalaxySearchBar />
       <div className="scores">
         <div className="scores-title filter-title">ratings</div>
         <div className="filter-selector">{mappedScore()}</div>
@@ -91,7 +116,15 @@ const Galaxy = () => {
         <div className="genres-title filter-title">genres</div>
         <div className="filter-selector">{mappedGenres()}</div>
       </div>
-      <div className="period"></div>
+      <div className="period">
+        <div className="period-start">{getPeriodRange(filteredPeriod)[0]}</div>
+        <div className="svgs">
+          <img className="front" src={rangeSvg} alt="" />
+          <img className="low-opac-behind" src={rangeSvg} alt="" />
+        </div>
+        <Slider className="period-slider" value={filteredPeriod} onChange={updatePeriod} />
+        <div className="period-end">{getPeriodRange(filteredPeriod)[1]}</div>
+      </div>
     </StyledGalaxy>
   )
 }
@@ -102,7 +135,7 @@ const StyledGalaxy = styled.div`
     position: absolute;
     width: 15vw;
     height: 100vh;
-    margin-top: 5vh;
+    margin-top: 10vh;
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
@@ -110,6 +143,67 @@ const StyledGalaxy = styled.div`
   }
   .genres {
     left: 20vw;
+  }
+
+  .period {
+    position: absolute;
+    bottom: 10vh;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 70vw;
+    * {
+      color: white;
+    }
+    .svgs img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      &.front {
+        clip-path: ${(props) => props.polygon};
+      }
+
+      &.low-opac-behind {
+        opacity: 0.2;
+      }
+    }
+
+    .period-slider {
+      width: 80%;
+
+      .MuiSlider-rail {
+        display: none;
+      }
+      .MuiSlider-track {
+        display: none;
+      }
+      .MuiSlider-thumb {
+        width: 3px;
+        height: 60px;
+        border-radius: 1px;
+        top: 50%;
+        transform: translateY(-50%);
+        &:nth-child(4):before {
+          right: 10px;
+        }
+        &:before {
+          content: "";
+          position: absolute;
+          left: 10px;
+          height: 80%;
+          width: 25px;
+          background-image: url(${dotsSvg});
+          background-repeat: no-repeat;
+        }
+        &:after {
+          content: none;
+        }
+      }
+    }
   }
 
   .filter-title {
