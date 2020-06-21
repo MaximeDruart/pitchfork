@@ -31,7 +31,6 @@ const initialState = {
   filteredGenres: allGenres,
   filteredScores: scores,
   filteredSearch: "",
-  filteredPeriod: [20, 80],
 }
 
 const apiReducer = (state = initialState, action) => {
@@ -45,6 +44,7 @@ const apiReducer = (state = initialState, action) => {
           }
 
         case "success":
+          console.log("returning reviews")
           return {
             ...state,
             loading: false,
@@ -90,9 +90,6 @@ const apiReducer = (state = initialState, action) => {
         default:
           return state
       }
-
-    case "SET_PERIOD":
-      return { ...state, filteredPeriod: action.payload }
 
     case "SET_GENRES":
       newFiltered = updateFilteredReviews({

@@ -1,6 +1,8 @@
-import React from "react"
+import React, { useEffect } from "react"
 import styled from "styled-components"
 import { NavButton } from "../../assets/StyledComponents"
+import { useDispatch } from "react-redux"
+import { getReviews } from "../../redux/actions/apiActions"
 
 const IntroContainer = styled.div`
   z-index: 10;
@@ -36,6 +38,10 @@ const IntroContainer = styled.div`
 `
 
 const Intro = () => {
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(getReviews({}, ["review", "role", "bnm", "id"]))
+  }, [])
   return (
     <IntroContainer>
       <div className="text-container">

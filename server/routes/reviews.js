@@ -25,6 +25,7 @@ RETURNS review objects filtered
 router.post("/find", (req, res) => {
   if (req.body.filters.date) req.body.filters.date = { $regex: new RegExp(req.body.filters.date) }
   Review.find(req.body.filters, getExclusionObject(req.body.exclusions))
+    // .limit(2000)
     .then((reviews) => (reviews.length > 0 ? res.json(reviews) : res.status(404).json("No reviews found for filters")))
     .catch((err) => res.status(400).json({ err }))
 })

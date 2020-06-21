@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, useSelector, shallowEqual } from "react-redux"
 import { getReviews, setPeriod, setGenres, setScores } from "../../redux/actions/apiActions"
 import styled from "styled-components"
 import { st } from "../../assets/StyledComponents"
@@ -8,6 +8,7 @@ import Slider from "@material-ui/core/Slider"
 import gsap from "gsap"
 import rangeSvg from "../../assets/icons/range.svg"
 import dotsSvg from "../../assets/icons/dots.svg"
+import { setZoomLevel } from "../../redux/actions/interfaceActions"
 
 const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -16,38 +17,23 @@ const getPeriodRange = ([a, b]) => [
   Math.floor(gsap.utils.mapRange(0, 100, 1999, 2019, b)),
 ]
 
-const getClipPath = (filteredPeriod) => {
-  const leftStr = filteredPeriod[0] + "%"
-  const rightStr = filteredPeriod[1] + "%"
+const getClipPath = (zoom) => {
+  const leftStr = zoom[0] + "%"
+  const rightStr = zoom[1] + "%"
   return `polygon(${leftStr} 0%, ${rightStr} 0%, ${rightStr} 100%, ${leftStr} 100%)`
 }
 
 const Galaxy = () => {
   const dispatch = useDispatch()
 
-  const { reviews, loading, reviewsError, filteredPeriod, filteredGenres, filteredScores, allGenres } = useSelector(
-    (state) => state.api
-  )
+  const reviews = useSelector((state) => state.api.reviews, shallowEqual)
+  const { filteredGenres, filteredScores, allGenres } = useSelector((state) => state.api, shallowEqual)
+  // const { filteredGenres, filteredScores, allGenres } = useSelector((state) => state.api, shallowEqual)
+  const zoom = useSelector((state) => state.interface.zoom)
 
   useEffect(() => {
-    if (reviews.length === 0) dispatch(getReviews({ genre: "Rock" }, ["review", "role", "bnm", "id"]))
+    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"]))
   }, [reviews, dispatch])
-
-  useEffect(() => {
-    if (!loading) {
-      // if loading is done and we have reviews
-      if (reviews.length > 0) {
-      } else {
-        // error case to handle : loading is done but no reviews retrieved
-      }
-    }
-  }, [loading, reviews])
-
-  useEffect(() => {
-    if (reviewsError) {
-      // handle server error
-    }
-  }, [reviewsError])
 
   const updateScores = (scoreToUpdate) => {
     let newScores = []
@@ -77,7 +63,7 @@ const Galaxy = () => {
     let clampedValue = newValue
     // need to restrain the value so the range doesn't get too small
     // if (newValue[1] - difference - newValue[0] < 0) clampedValue = [newValue[0], newValue[1]]
-    dispatch(setPeriod(clampedValue))
+    dispatch(setZoomLevel(clampedValue))
   }
 
   const mappedScore = () =>
@@ -106,7 +92,7 @@ const Galaxy = () => {
     ))
 
   return (
-    <StyledGalaxy polygon={getClipPath(filteredPeriod)}>
+    <StyledGalaxy polygon={getClipPath(zoom)}>
       <GalaxySearchBar />
       <div className="scores">
         <div className="scores-title filter-title">ratings</div>
@@ -117,13 +103,13 @@ const Galaxy = () => {
         <div className="filter-selector">{mappedGenres()}</div>
       </div>
       <div className="period">
-        <div className="period-start">{getPeriodRange(filteredPeriod)[0]}</div>
+        <div className="period-start">{getPeriodRange(zoom)[0]}</div>
         <div className="svgs">
           <img className="front" src={rangeSvg} alt="" />
           <img className="low-opac-behind" src={rangeSvg} alt="" />
         </div>
-        <Slider className="period-slider" value={filteredPeriod} onChange={updatePeriod} />
-        <div className="period-end">{getPeriodRange(filteredPeriod)[1]}</div>
+        <Slider className="period-slider" value={zoom} onChange={updatePeriod} />
+        <div className="period-end">{getPeriodRange(zoom)[1]}</div>
       </div>
     </StyledGalaxy>
   )
