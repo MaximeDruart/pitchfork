@@ -181,7 +181,7 @@ const StyledGalaxy = styled.div`
     cursor: pointer;
   }
   .genres {
-    left: 15vw;
+    left: 11vw;
     align-items: flex-start;
   }
 
@@ -265,10 +265,10 @@ const StyledGalaxy = styled.div`
 
   .filter-title {
     color: white;
-    font-weight: 400;
-    margin-bottom: 2vh;
+    font-family: "Oswald-Light";
+    margin-bottom: 4vh;
     text-transform: uppercase;
-    font-size: ${st.fzMedium};
+    font-size: ${st.fzSmall};
     letter-spacing: 2px;
   }
 
@@ -279,21 +279,21 @@ const StyledGalaxy = styled.div`
 `
 
 const StyledScoreItem = styled.div`
-  color: white;
+  color: ${(props) => (props.active ? "white" : "#868686")};
   opacity: ${(props) => (props.active ? "1" : "0.5")};
   font-family: ${(props) => (props.active ? "Oswald-Medium" : "Oswald-Light")};
   transition: ${(props) => (props.done ? "all 0.3s ease-in-out;" : "done")};
-  font-size: ${st.fzMedium};
+  font-size: ${st.fzSmall};
   text-align: right;
   cursor: pointer;
   margin-bottom: 20px;
 `
 
 const StyledGenreItem = styled.div`
-  font-family: ${(props) => (props.active ? "Oswald-Regular" : "Oswald-Regular")};
+  font-family: ${(props) => (props.active ? "Oswald-Medium" : "Oswald-Regular")};
   color: ${(props) => (props.active ? st.genresColors[props.genre] : st.txtGrey)};
   transition: ${(props) => (props.done ? "all 0.3s ease-in-out;" : "done")};
-  font-size: ${st.fzMedium};
+  font-size: ${st.fzSmall};
   margin-bottom: 20px;
   cursor: pointer;
   text-transform: uppercase;
