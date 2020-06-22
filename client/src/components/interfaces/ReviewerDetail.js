@@ -175,21 +175,19 @@ const ReviewerContainer = styled.div`
     width: 100%;
     margin: 0 auto;
     color: white;
-    padding-left: 6vw;
-    padding-top: 14vh;
-    * {
-      text-transform: uppercase;
-    }
+    padding: 12vh 6vw 0vh 6vw;
     .info {
       margin-bottom: 20px;
     }
     .info-title {
       font-size: 23px;
       font-family: "Oswald-Light";
+      letter-spacing: 2px;
     }
     .info-content {
       font-size: 55px;
       font-family: "Oswald-Bold";
+      text-transform: uppercase;
       margin-bottom: 10px;
       opacity: ${(p) => (!p.activeReviewer ? 0 : 1)};
       transition: all 0.4s ease-in-out;
@@ -203,7 +201,6 @@ const ReviewerContainer = styled.div`
       font-size: 35px;
     }
     .used-words {
-      text-transform: uppercase;
       font-size: 35px;
     }
   }
