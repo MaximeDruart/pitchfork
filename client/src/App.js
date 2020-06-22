@@ -24,7 +24,7 @@ const App = () => {
       {/* COMPONENTS ON ALL ROUTES */}
       <GalaxyPopup />
       {pathname !== "/" && <Nav />}
-      <THREECanvas />
+      {/* <THREECanvas /> */}
     </div>
   )
 }

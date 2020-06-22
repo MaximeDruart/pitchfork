@@ -46,6 +46,11 @@ export const getReviews = (filters = {}, exclusions = [], sampleSize = 8500) => 
 
 // getting reviewers
 
+export const setActiveReviewer = (payload) => ({
+  type: "SET_ACTIVE_REVIEWER",
+  payload,
+})
+
 export const fetchReviewersRequest = () => {
   return {
     type: "FETCH_REVIEWERS",

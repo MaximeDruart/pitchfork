@@ -24,9 +24,10 @@ const initialState = {
   loading: false,
   reviews: [],
   reviewsError: "",
+  filteredReviews: [],
   reviewers: [],
   reviewersError: "",
-  filteredReviews: [],
+  activeReviewer: "",
   allGenres,
   filteredGenres: allGenres,
   filteredScores: scores,
@@ -90,6 +91,9 @@ const apiReducer = (state = initialState, action) => {
         default:
           return state
       }
+
+    case "SET_ACTIVE_REVIEWER":
+      return { ...state, activeReviewer: action.payload }
 
     case "SET_GENRES":
       newFiltered = updateFilteredReviews({

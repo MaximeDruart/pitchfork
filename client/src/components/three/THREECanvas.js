@@ -69,6 +69,7 @@ const THREECanvas = () => {
   const $canvas = useRef(null)
   // const api = useSelector(state => state.api, shallowEqual)
   const reviews = useSelector((state) => state.api.reviews, shallowEqual)
+  const activeReviewer = useSelector((state) => state.api.activeReviewer, shallowEqual)
   const loading = useSelector((state) => state.api.loading, shallowEqual)
   const filteredReviews = useSelector((state) => state.api.filteredReviews, shallowEqual)
 
@@ -210,11 +211,14 @@ const THREECanvas = () => {
           $canvas.current.style.cursor = "pointer"
           if (clicking) {
             dispatch(setHoveredAlbum(intersects[0].object.userData))
+
             // converting 3d world pos to 2d screen pos
-            let vector = intersects[0].object.position.project(th.camera)
+            const objectPos = new THREE.Vector3().copy(intersects[0].object.position)
+            const vector = objectPos.project(th.camera)
             vector.x = ((vector.x + 1) * window.screen.width) / 2
             vector.y = (-(vector.y - 1) * window.screen.height) / 2
             dispatch(setAlbumPosition([vector.x, vector.y]))
+
             openedAlbum = true
             clicking = false
           }

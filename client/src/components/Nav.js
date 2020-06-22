@@ -1,8 +1,11 @@
 import React from "react"
 import styled from "styled-components"
 import { NavLink } from "react-router-dom"
+import { useSelector } from "react-redux"
 
 const Nav = () => {
+  let activeReviewer = useSelector((state) => state.api.activeReviewer)
+  if (!activeReviewer) activeReviewer = { slug: "andy-beta" }
   return (
     <StyledNav>
       <div className="nav-elements">
@@ -10,7 +13,7 @@ const Nav = () => {
           <div className="nav-bar"></div>
           <div className="nav-link-text">albums</div>
         </NavLink>
-        <NavLink to="/reviewer/andy-beta" className="nav-element">
+        <NavLink to={`/reviewer/${activeReviewer.slug}`} className="nav-element">
           <div className="nav-bar"></div>
           <div className="nav-link-text">reviewers</div>
         </NavLink>

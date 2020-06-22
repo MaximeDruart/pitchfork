@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react"
 import { useParams, useHistory } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 
-import { getReviewers } from "../../redux/actions/apiActions"
+import { getReviewers, setActiveReviewer } from "../../redux/actions/apiActions"
 import styled from "styled-components"
 import { Button } from "../../assets/StyledComponents"
 
@@ -14,11 +14,10 @@ import nextRightButton from "../../assets/icons/next-right.svg"
 
 const ReviewerDetail = () => {
   const [showOverlay, setShowOverlay] = useState(false)
-  const [reviewer, setReviewer] = useState(null)
   const dispatch = useDispatch()
 
   const history = useHistory()
-  const { reviewers, loading, reviewersError } = useSelector((state) => state.api)
+  const { reviewers, loading, activeReviewer } = useSelector((state) => state.api)
   const { slug } = useParams()
 
   // mongo command is find() so it sends back an array
@@ -39,22 +38,21 @@ const ReviewerDetail = () => {
           history.push("/reviewer/andy-beta")
           window.location.reload()
         }
-        setReviewer(reviewerTemp)
-      } else {
-        // error case to handle : loading is done but no reviewers retrieved
+        console.log(reviewerTemp)
+        // reviewerTemp.id = reviewers.ind
+        dispatch(setActiveReviewer(reviewerTemp))
       }
     }
   }, [loading, history, reviewers, slug])
 
-  useEffect(() => {
-    if (reviewersError) {
-      // handle server error
-    }
-  }, [reviewersError])
-
   const preferedWords = useMemo(
-    () => reviewer?.preferedWords.slice(0, 5).map((word) => <span className="word">{word}, </span>),
-    [reviewer]
+    () =>
+      activeReviewer?.preferedWords?.slice(0, 5).map((word, index) => (
+        <span key={index} className="word">
+          {word},{" "}
+        </span>
+      )),
+    [activeReviewer]
   )
 
   const changeReviewer = (direction) => {
@@ -62,7 +60,7 @@ const ReviewerDetail = () => {
   }
 
   return (
-    <ReviewerContainer>
+    <ReviewerContainer isLoading={loading}>
       {!loading && reviewers.length > 0 && (
         <ReviewersOverlay setShow={setShowOverlay} show={showOverlay} reviewers={reviewers} />
       )}
@@ -71,7 +69,11 @@ const ReviewerDetail = () => {
           <div className="previous">
             <img onClick={() => changeReviewer("previous")} src={nextLeftButton} alt=""></img>
           </div>
-          {loading ? <div className="name-placeholder"></div> : <div className="name">{reviewer?.name}</div>}
+          {loading ? (
+            <div className="name-placeholder">Fallback</div>
+          ) : (
+            <div className="name">{activeReviewer?.name}</div>
+          )}
           <div className="next">
             <img onClick={() => changeReviewer("previous")} alt="" src={nextRightButton}></img>
           </div>
@@ -83,16 +85,22 @@ const ReviewerDetail = () => {
       <div className="general-infos-container">
         <div className="info">
           <div className="info-title">Favorite Genre</div>
-          <div className="info-content">{reviewer?.preferedGenre}</div>
+          <div className="info-content">
+            {activeReviewer.preferedGenre ? activeReviewer.preferedGenre : "placeholder"}
+          </div>
         </div>
         <div className="info">
           <div className="info-title">Number of reviews</div>
-          <div className="info-content">{reviewer?.reviewCount}</div>
+          <div className="info-content">{activeReviewer.reviewCount ? activeReviewer.reviewCount : "placeholder"}</div>
         </div>
         <div className="info">
           <div className="info-title">Average score</div>
           <div className="average-score-container">
-            <div className="info-content">{reviewer?.averageScore}</div>
+            <div className="info-content">
+              {activeReviewer.averageScore
+                ? Math.round((activeReviewer.averageScore + Number.EPSILON) * 100) / 100
+                : "placeholder"}
+            </div>
             <div className="on-ten">/10</div>
           </div>
         </div>
@@ -116,11 +124,10 @@ const ReviewerContainer = styled.div`
     justify-content: space-between;
     flex-direction: row;
     align-items: center;
-    width: 1280px;
-    margin: 0 auto;
-    padding-bottom: 60px;
+    width: 100%;
     color: white;
     margin-top: 20px;
+    padding: 0 40px;
     .see-all-reviewers {
       width: 240px;
       height: 60px;
@@ -135,9 +142,13 @@ const ReviewerContainer = styled.div`
     display: flex;
     align-items: center;
     width: 500px;
-    .name {
+    .name,
+    .name-placeholder {
       font-size: 80px;
       margin: 0px 50px;
+    }
+    .name-placeholder {
+      opacity: 0;
     }
     .previous,
     .next {
@@ -157,19 +168,26 @@ const ReviewerContainer = styled.div`
   .general-infos-container {
     display: flex;
     flex-direction: column;
-    width: 1280px;
+    width: 100%;
     margin: 0 auto;
     color: white;
+    padding-left: 6vw;
+    padding-top: 14vh;
+    * {
+      text-transform: uppercase;
+    }
     .info {
       margin-bottom: 20px;
     }
     .info-title {
       font-size: 23px;
+      font-family: "Oswald-Light";
     }
     .info-content {
       font-size: 55px;
-      font-weight: 600;
+      font-family: "Oswald-Bold";
       margin-bottom: 10px;
+      opacity: ${(p) => (p.isLoading ? 0 : 1)};
     }
     .average-score-container {
       display: flex;
