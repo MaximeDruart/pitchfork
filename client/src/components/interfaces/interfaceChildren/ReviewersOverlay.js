@@ -3,11 +3,15 @@ import styled from "styled-components"
 
 // Import icons
 import nextLeftButton from "../../../assets/icons/next-left.svg"
+import filterButton from "../../../assets/icons/filter-button-down.svg"
 import { useHistory } from "react-router-dom"
 
 const StyledOverlay = styled.div`
   display: ${(props) => (props.show ? "block" : "none")};
+  width: 100vw;
   height: 100vh;
+  background-color: #0C0A17;
+  overflow: scroll;
   .container {
     display: flex;
     flex-direction: column;
@@ -22,12 +26,19 @@ const StyledOverlay = styled.div`
       text-transform: uppercase;
       font-family: "Oswald-ExtraLight";
       letter-spacing: 4px;
+      cursor: pointer;
       .right {
         display: flex;
         justify-content: space-between;
-        width: 400px;
+        width: 460px;
         align-self: flex-end;
         font-family: "Oswald-ExtraLight";
+      }
+      img{
+        width: 13px;
+        height: 13px;
+        margin-left: 3px;
+        color: white;
       }
     }
   }
@@ -65,7 +76,7 @@ const StyledAllReviewers = styled.div`
     .right {
       display: flex;
       justify-content: space-between;
-      width: 400px;
+      width: 460px;
       text-align: right;
       .genre,
       .reviews {
@@ -109,10 +120,19 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
             <img onClick={() => setShow(false)} src={nextLeftButton}></img>
           </div>
           <div className="filters">
-            <div className="left">filter names</div>
+            <div className="left">
+              filter names
+              <img className="filter-button" src={filterButton}></img>
+            </div>
             <div className="right">
-              <div>select genres</div>
-              <div>number of reviews</div>
+              <div>
+                select genres
+                <img className="filter-button" src={filterButton}></img>
+              </div>
+              <div>
+                number of reviews
+                <img className="filter-button" src={filterButton}></img>
+              </div>
             </div>
           </div>
         </div>
