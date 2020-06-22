@@ -20,13 +20,14 @@ const StyledOverlay = styled.div`
       width: 1100px;
       margin: 0 auto;
       text-transform: uppercase;
-      font-weight: 300;
+      font-family: "Oswald-ExtraLight";
       letter-spacing: 4px;
       .right {
         display: flex;
         justify-content: space-between;
         width: 400px;
         align-self: flex-end;
+        font-family: "Oswald-ExtraLight";
       }
     }
   }
