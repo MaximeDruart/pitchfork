@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react"
 import { useParams, useHistory } from "react-router-dom"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, useSelector, shallowEqual } from "react-redux"
 
-import { getReviewers, setActiveReviewer } from "../../redux/actions/apiActions"
+import { getReviewers, setActiveReviewer, getReviews } from "../../redux/actions/apiActions"
 import styled from "styled-components"
 import { Button } from "../../assets/StyledComponents"
 
@@ -11,20 +11,29 @@ import ReviewersOverlay from "./interfaceChildren/ReviewersOverlay"
 // Import icons
 import nextLeftButton from "../../assets/icons/next-left.svg"
 import nextRightButton from "../../assets/icons/next-right.svg"
+import { useLayoutEffect } from "react"
+import gsap from "gsap/gsap-core"
+import { useRef } from "react"
 
+let spawnTl
 const ReviewerDetail = () => {
   const [showOverlay, setShowOverlay] = useState(false)
   const dispatch = useDispatch()
 
   const history = useHistory()
-  const { reviewers, loading, activeReviewer } = useSelector((state) => state.api)
   const { slug } = useParams()
+  const { reviewers, loading, activeReviewer, sampleSize } = useSelector((state) => state.api, shallowEqual)
+  const reviews = useSelector((state) => state.api.reviews, shallowEqual)
 
   // mongo command is find() so it sends back an array
   useEffect(() => {
     // only querying if data isnt already in store
     if (reviewers.length === 0) dispatch(getReviewers({}, ["reviewIds"]))
   }, [dispatch, reviewers.length])
+
+  useEffect(() => {
+    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"], sampleSize))
+  }, [dispatch, reviews.length])
 
   // GETTING URL REVIEWER INFO
   useEffect(() => {
@@ -38,8 +47,11 @@ const ReviewerDetail = () => {
           history.push("/reviewer/andy-beta")
           window.location.reload()
         }
-        console.log(reviewerTemp)
-        // reviewerTemp.id = reviewers.ind
+        reviewers.forEach((reviewer, index) => {
+          if (reviewer.name === reviewerTemp.name) {
+            reviewerTemp.index = index
+          }
+        })
         dispatch(setActiveReviewer(reviewerTemp))
       }
     }
@@ -56,26 +68,24 @@ const ReviewerDetail = () => {
   )
 
   const changeReviewer = (direction) => {
-    // implement next / last reviewer
+    if (reviewers[activeReviewer.index + direction]) {
+      history.push(`/reviewer/${reviewers[activeReviewer.index + direction].slug}`)
+    }
   }
 
   return (
-    <ReviewerContainer isLoading={loading}>
+    <ReviewerContainer activeReviewer={activeReviewer}>
       {!loading && reviewers.length > 0 && (
         <ReviewersOverlay setShow={setShowOverlay} show={showOverlay} reviewers={reviewers} />
       )}
       <div className="header">
         <div className="reviewer-name-container">
           <div className="previous">
-            <img onClick={() => changeReviewer("previous")} src={nextLeftButton} alt=""></img>
+            <img onClick={() => changeReviewer(-1)} src={nextLeftButton} alt=""></img>
           </div>
-          {loading ? (
-            <div className="name-placeholder">Fallback</div>
-          ) : (
-            <div className="name">{activeReviewer?.name}</div>
-          )}
+          <div className="name">{activeReviewer ? activeReviewer.name : "placeholder"}</div>
           <div className="next">
-            <img onClick={() => changeReviewer("previous")} alt="" src={nextRightButton}></img>
+            <img onClick={() => changeReviewer(1)} alt="" src={nextRightButton}></img>
           </div>
         </div>
         <Button onClick={() => setShowOverlay(true)} className="see-all-reviewers">
@@ -85,21 +95,17 @@ const ReviewerDetail = () => {
       <div className="general-infos-container">
         <div className="info">
           <div className="info-title">Favorite Genre</div>
-          <div className="info-content">
-            {activeReviewer.preferedGenre ? activeReviewer.preferedGenre : "placeholder"}
-          </div>
+          <div className="info-content">{activeReviewer ? activeReviewer.preferedGenre : "placeholder"}</div>
         </div>
         <div className="info">
           <div className="info-title">Number of reviews</div>
-          <div className="info-content">{activeReviewer.reviewCount ? activeReviewer.reviewCount : "placeholder"}</div>
+          <div className="info-content">{activeReviewer ? activeReviewer.reviewCount : "placeholder"}</div>
         </div>
         <div className="info">
           <div className="info-title">Average score</div>
           <div className="average-score-container">
             <div className="info-content">
-              {activeReviewer.averageScore
-                ? Math.round((activeReviewer.averageScore + Number.EPSILON) * 100) / 100
-                : "placeholder"}
+              {activeReviewer ? Math.round((activeReviewer.averageScore + Number.EPSILON) * 100) / 100 : "placeholder"}
             </div>
             <div className="on-ten">/10</div>
           </div>
@@ -141,14 +147,12 @@ const ReviewerContainer = styled.div`
   .reviewer-name-container {
     display: flex;
     align-items: center;
-    width: 500px;
-    .name,
-    .name-placeholder {
+
+    .name {
       font-size: 80px;
       margin: 0px 50px;
-    }
-    .name-placeholder {
-      opacity: 0;
+      opacity: ${(p) => (!p.activeReviewer ? 0 : 1)};
+      transition: all 0.4s ease-in-out;
     }
     .previous,
     .next {
@@ -187,7 +191,8 @@ const ReviewerContainer = styled.div`
       font-size: 55px;
       font-family: "Oswald-Bold";
       margin-bottom: 10px;
-      opacity: ${(p) => (p.isLoading ? 0 : 1)};
+      opacity: ${(p) => (!p.activeReviewer ? 0 : 1)};
+      transition: all 0.4s ease-in-out;
     }
     .average-score-container {
       display: flex;

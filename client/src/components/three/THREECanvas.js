@@ -22,7 +22,7 @@ const StyledCanvasContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  z-index: -100;
+  z-index: 100;
   /* opacity: 0.4; */
 `
 
@@ -38,7 +38,7 @@ const th = {
   rayCaster: new THREE.Raycaster(),
   axesHelper: new THREE.AxesHelper(10),
   gridHelper: new THREE.GridHelper(200, 200),
-  polarGridHelper: new THREE.PolarGridHelper(),
+  polarGridHelper: new THREE.PolarGridHelper(5, 1, 1, 64),
 
   controls: "",
   tbcontrols: "",
@@ -62,6 +62,8 @@ const th = {
 }
 th.cameraHelper = new THREE.CameraHelper(th.camera)
 th.sphere.mesh = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
+th.polarGridHelper.material.transparent = true
+th.polarGridHelper.material.opacity = 0.3
 
 // th.sphereInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
@@ -94,7 +96,7 @@ const THREECanvas = () => {
         th.controls.enableDamping = true
         th.controls.enableRotate = false
         th.controls.mouseButtons.LEFT = THREE.MOUSE.PAN
-        th.controls.mouseButtons.RIGHT = null
+        th.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
         // th.controls.screenSpacePanning = true
 
         th.controls.maxDistance = 50
@@ -131,9 +133,25 @@ const THREECanvas = () => {
     }
   }
 
+  const toggleRadialHelp = (isTrue = true) => {
+    if (isTrue) {
+      th.scene.add(th.polarGridHelper)
+    } else {
+      th.scene.remove(th.polarGridHelper)
+    }
+  }
+
+  const switchControlsForReviewer = () => {
+    if (th.controls) {
+      th.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE
+      th.controls.mouseButtons.RIGHT = null
+      th.controls.enableRotate = true
+      th.controls.enableZoom = false
+    }
+  }
+
   // threejs scene
   useEffect(() => {
-    console.log("running scene")
     let mouse = new THREE.Vector2()
     let clicking = false
     let openedAlbum = false
@@ -141,18 +159,26 @@ const THREECanvas = () => {
      * Scene Initial Status
      */
 
-    th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
-    th.camera.position.set(0, 0, 0)
+    // th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
+    // th.camera.position.set(0, 0, -10)
 
-    toggleHelp(true)
+    console.log("setting camera pos")
+    th.camera.position.z = -10
+
+    // toggleHelp(true)
     setTimeout(() => {
+      console.log("enabling orbit")
       toggleOrbitControls(true)
       // toggleTrackBallControls(true)
       th.controls &&
         th.controls.addEventListener("change", () => {
-          // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
-          th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
-          // update timeline
+          if (pathname === "/galaxy") {
+            // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
+            th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
+            // update timeline
+          } else if (pathname.includes("/reviewer/")) {
+            // th.camera.lookAt(th.sphereGroup)
+          }
         })
     }, 100)
 
@@ -225,15 +251,15 @@ const THREECanvas = () => {
         }
       }
 
-      // setTimeout(() => {
-      //   if (th.sphereGroup?.children?.length > 0) {
-      //     th.sphereGroup.children.forEach((sphere, index) => {
-      //       sphere.position.y = th.sphereYs[index] + Math.sin(t / 500) / sphere.userData.random
-      //     })
-      //   }
-      // }, 5000)
+      if (pathname.includes("/reviewer/")) {
+        if (th.sphereGroup.rotation) {
+          th.sphereGroup.rotation.y = t / 5000
+        }
+      }
 
+      // small up and down movement
       if (th.sphereGroup.position) th.sphereGroup.position.y = Math.sin(t / 500) / 50
+
       // th.sphereInstancedMesh.instanceMatrix.needsUpdate = true
 
       th.renderer.render(th.scene, th.camera)
@@ -312,7 +338,12 @@ const THREECanvas = () => {
       th.scene.add(th.sphereGroup)
       // gsap.to(th.sphereGroup.children)
       const materials = th.sphereGroup.children.map((child) => child.material)
-      gsap.to(materials, { opacity: 1, stagger: { amount: 1.2 }, duration: 0.5, onComplete: () => setSpawnDone(true) })
+      gsap.to(materials, {
+        opacity: 1,
+        stagger: { amount: 1.2 },
+        duration: 0.5,
+        onComplete: () => setSpawnDone(true),
+      })
 
       /** Instanced mesh approach, thing is you can't store data for each individual instance. Not even sure that it's better performance wise */
       // th.scene.add(th.sphereInstancedMesh)
@@ -329,7 +360,6 @@ const THREECanvas = () => {
   // updating reviews with new filters in galaxy
   useEffect(() => {
     // if albums have been fetched and the initial sphere render is done
-
     // inplementing debouncing to that the expensive search op is executed less often
     if (pathname === "/galaxy") {
       const timeDiff = Date.now() - lastUpdate
@@ -344,11 +374,8 @@ const THREECanvas = () => {
           })
         })
       }
-    } else if (pathname.includes("/reviewer")) {
     }
   }, [filteredReviews])
-
-  // const removeChildren = () => while(th.scene.children.length) th.scene.remove()
 
   // camera movements in galaxy
   useEffect(() => {
@@ -362,31 +389,67 @@ const THREECanvas = () => {
     const tanDeg = tanRad
     // const cameraZ = (rangeMappedToRealWorld[1] - rangeMappedToRealWorld[0]) / tanDeg
     const cameraZ = testY / tanDeg
-    th.camera.position.z = cameraZ
-    th.camera.updateProjectionMatrix()
+    // console.log("setting camera z via zoom")
+    // th.camera.position.z = cameraZ
+    // th.camera.updateProjectionMatrix()
   }, [zoom])
 
-  // useEffect(() => {
-  //   if (!loading && reviews.length > 0) {
-  //     const albumNames = filteredReviews.map((review) => review.album)
-  //     const childrenToFadeOut = []
-  //     th.filteredSphereGroup.children.forEach((sphereChild) => {
-  //       // if (albumNames.includes(sphereChild.userData.album)) scaleOut(sphereChild, () => (sphereChild.visible = false))
-  //       // sphereChild.visible = albumNames.includes(sphereChild.userData.album)
-  //       albumNames.includes(sphereChild.userData.album) && childrenToFadeOut.push(sphereChild)
-  //     })
-  //     // gsap.to(childrenToFadeOut, {
-  //     //   duration: 0.6,
-  //     //   three: { scaleX: 0.01, scaleY: 0.01, scaleZ: 0.01 },
-  //     //   stagger: 0.07,
-  //     // })
-  //   }
-  // }, [filteredReviews])
+  // REVIEWERDETAIL scene setup
+  useEffect(() => {
+    if (pathname.includes("/reviewer")) {
+      th.scene.position.set(0, 0, 0)
+      if (reviews.length) {
+        const range = 5
+        const variationRo = 0.3
+        const variationPhi = 0.7
 
-  const scaleOut = (threeObject, cb) => {
-    const tl = new gsap.timeline({ onComplete: cb() })
-    tl.to(threeObject.scale, { x: 0.01, y: 0.01, z: 0.01, duration: 0.3 })
-  }
+        // toggleRadialHelp(true)
+        switchControlsForReviewer()
+
+        const lineGroup = new THREE.Group()
+        const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.4 })
+        const points = []
+        for (let i = 0; i < 62; i++)
+          points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2, ((Math.PI * 2) / 64) * i))
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points)
+        const line = new THREE.Line(lineGeometry, lineMaterial)
+
+        lineGroup.add(line)
+
+        const reviewsForReviewer = reviews.filter((_review) => _review.author === activeReviewer.name)
+
+        th.sphereGroup = new THREE.Group()
+        th.sphereGroup.name = "sphereGroup"
+        th.sphereGroup.rotation.x = degToRad(-12)
+
+        reviewsForReviewer.forEach((review) => {
+          const roComputed = gsap.utils.mapRange(0, 10, 0, range, review.score) // radius
+          // const roComputed = 5 // radius
+          const thetaComputed = dateToYearPercent(review.date, "rad") // x-y angle
+          const phiComputed = Math.PI / 2 // z angle
+          // const phiComputed = gsap.utils.random(Math.PI / 2 - variationPhi, Math.PI / 2 + variationPhi) // z angle
+
+          const sphere = new THREE.Mesh(
+            th.sphere.geometry,
+            new THREE.MeshPhongMaterial({
+              color: st.genresColors[review.genre],
+              transparent: true,
+              opacity: 1,
+            })
+          )
+          sphere.position.setFromSphericalCoords(roComputed, phiComputed, thetaComputed)
+          sphere.userData = { ...review }
+          th.sphereGroup.add(sphere)
+        })
+
+        // decoration
+        th.sphereGroup.add(lineGroup)
+
+        th.scene.add(th.sphereGroup)
+        console.log(th.sphereGroup)
+      }
+    }
+  }, [filteredReviews])
 
   return <StyledCanvasContainer ref={$canvas} />
 }

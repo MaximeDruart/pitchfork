@@ -41,7 +41,8 @@ const IntroContainer = styled.div`
 const Intro = () => {
   const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(getReviews({}, ["review", "role", "bnm", "id"]))
+    // to update
+    // dispatch(getReviews({}, ["review", "role", "bnm", "id"]))
   }, [])
   return (
     <IntroContainer>

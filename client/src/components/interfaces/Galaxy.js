@@ -32,12 +32,11 @@ const Galaxy = () => {
   const [spawnAnimDone, setSpawnAnimDone] = useState(false)
 
   const reviews = useSelector((state) => state.api.reviews, shallowEqual)
-  const { filteredGenres, filteredScores, allGenres } = useSelector((state) => state.api, shallowEqual)
+  const { filteredGenres, filteredScores, allGenres, sampleSize } = useSelector((state) => state.api, shallowEqual)
   // const { filteredGenres, filteredScores, allGenres } = useSelector((state) => state.api, shallowEqual)
   const zoom = useSelector((state) => state.interface.zoom)
 
   useEffect(() => {
-    const sampleSize = 2000
     if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"], sampleSize))
   }, [reviews, dispatch])
 
