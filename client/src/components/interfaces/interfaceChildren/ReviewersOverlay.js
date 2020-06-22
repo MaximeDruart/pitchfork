@@ -83,6 +83,7 @@ const StyledAllReviewers = styled.div`
 
 const ReviewersOverlay = ({ show, setShow, reviewers }) => {
   const history = useHistory()
+
   const mappedReviewers = reviewers.map((reviewer) => (
     <StyledAllReviewers key={reviewer._id}>
       <div className="reviewer">
@@ -91,12 +92,15 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
         </div>
         <div className="right">
           <div className="genre">{reviewer.preferedGenre}</div>
-          <div className="reviews">{reviewer.reviewCount} reviews </div>
+          <div className="reviews">
+            {reviewer.reviewCount} review{reviewer.reviewCount > 1 && "s"}
+          </div>
         </div>
       </div>
       <div className="section"></div>
     </StyledAllReviewers>
   ))
+
   return (
     <StyledOverlay show={show}>
       <div className="header">

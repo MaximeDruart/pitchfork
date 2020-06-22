@@ -31,6 +31,7 @@ const StyledNav = styled.nav`
   top: 50%;
   transform: translateY(-50%);
   right: 3vw;
+  z-index: 1000;
   .nav-elements {
     .nav-element {
       display: block;

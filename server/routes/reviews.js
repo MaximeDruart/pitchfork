@@ -117,16 +117,22 @@ const recMultiGenre = (reviews, index, res) => {
 // const fs = require("fs")
 // let rawdata = fs.readFileSync("./srcLast.json")
 // let src = JSON.parse(rawdata)
-let index = 0
-router.get("/src", (req, res) => {
-  Review.updateMany(
-    {},
-    {
-      $set: {
-        coverSrc: src[index++],
-      },
-    }
-  )
+
+const rawUrlData = require("../test/srcLast4.json")
+
+router.post("/src", (req, res) => {
+  // Review.updateMany({}, {coverSrc : ""})
+  Review.find({}, { review: 0 }).then((reviews) => {
+    rawUrlData.forEach((data) => {
+      const correspondingReview = reviews.filter((review) => review.link === data.reviewUrl)[0]
+      if (correspondingReview) {
+        console.log(correspondingReview.link, data.reviewUrl)
+        Review.findByIdAndUpdate(correspondingReview.id, { coverSrc: data.coverSrc }, () => {
+          console.log("src added", correspondingReview.artist, data.coverSrc)
+        })
+      }
+    })
+  })
 })
 
 module.exports = router

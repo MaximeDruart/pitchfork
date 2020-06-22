@@ -107,7 +107,7 @@ const ReviewerDetail = () => {
             <div className="info-content">
               {activeReviewer ? Math.round((activeReviewer.averageScore + Number.EPSILON) * 100) / 100 : "placeholder"}
             </div>
-            <div className="on-ten">/10</div>
+            <span className="on-ten">/10</span>
           </div>
         </div>
         <div className="align-with-graphs">
@@ -125,7 +125,11 @@ const ReviewerDetail = () => {
 }
 
 const ReviewerContainer = styled.div`
+  z-index: -1;
   .header {
+    /* wierd af but posr/f/a allows it to be above canvas  */
+    position: relative;
+    z-index: 100;
     display: flex;
     justify-content: space-between;
     flex-direction: row;
@@ -169,13 +173,22 @@ const ReviewerContainer = styled.div`
       }
     }
   }
+
   .general-infos-container {
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+
     display: flex;
     flex-direction: column;
     width: 100%;
     margin: 0 auto;
     color: white;
     padding: 12vh 6vw 0vh 6vw;
+    user-select: none;
+    * {
+      user-select: none;
+    }
     .info {
       margin-bottom: 20px;
     }

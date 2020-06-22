@@ -11,6 +11,7 @@ import { dateToYearPercent, degToRad } from "./utils"
 import { setHoveredAlbum, setAlbumPosition } from "../../redux/actions/interfaceActions"
 import Stats from "stats.js"
 import { st } from "../../assets/StyledComponents"
+import textTextures from "../../assets/textTextures"
 
 const stats = new Stats()
 stats.showPanel(0)
@@ -22,7 +23,7 @@ const StyledCanvasContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 100;
+  z-index: -1;
   /* opacity: 0.4; */
 `
 
@@ -30,9 +31,9 @@ const fov = 60
 
 const th = {
   scene: new THREE.Scene(),
-  camera: new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 80),
+  camera: new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 150),
   renderer: new THREE.WebGLRenderer({
-    alpha: false,
+    alpha: true,
     antialias: true,
   }),
   rayCaster: new THREE.Raycaster(),
@@ -49,16 +50,16 @@ const th = {
   sphereGroup: "",
   filteredSphereGroup: "",
   sceneSize: {
-    width: 70,
+    width: 140,
     height: 16,
-    depth: 40, // keeping a 50th of sampleSize seems good
+    depth: 60, // keeping a 50th of sampleSize seems good
   },
   fog: {
     near: 10,
     far: 19.5,
     color: 0x99000000,
   },
-  sphereYs: [],
+  textures: [],
 }
 th.cameraHelper = new THREE.CameraHelper(th.camera)
 th.sphere.mesh = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
@@ -98,6 +99,7 @@ const THREECanvas = () => {
         th.controls.mouseButtons.LEFT = THREE.MOUSE.PAN
         th.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
         // th.controls.screenSpacePanning = true
+        th.controls.panSpeed = 2
 
         th.controls.maxDistance = 50
         th.controls.minDistance = 5
@@ -152,6 +154,13 @@ const THREECanvas = () => {
 
   // threejs scene
   useEffect(() => {
+    const textureLoader = new THREE.TextureLoader()
+    textTextures.forEach((textTexture) => {
+      textureLoader.load(textTexture, (_texture) => {
+        th.textures.push(_texture)
+      })
+    })
+
     let mouse = new THREE.Vector2()
     let clicking = false
     let openedAlbum = false
@@ -159,13 +168,16 @@ const THREECanvas = () => {
      * Scene Initial Status
      */
 
-    // th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
-    // th.camera.position.set(0, 0, -10)
+    if (pathname === "/galaxy") {
+      console.log("litteraly fogging")
+      th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
+    }
+    th.camera.position.set(0, 0, 10)
 
-    console.log("setting camera pos")
-    th.camera.position.z = -10
+    if (pathname.includes("/reviewer/")) th.camera.position.z = -10
+    // console.log("setting camera pos")
 
-    // toggleHelp(true)
+    toggleHelp(true)
     setTimeout(() => {
       console.log("enabling orbit")
       toggleOrbitControls(true)
@@ -191,7 +203,9 @@ const THREECanvas = () => {
       mouse.x = (x / window.innerWidth) * 2 - 1
       mouse.y = -(y / window.innerHeight) * 2 + 1
     }
-    const onMouseDownHandler = () => (clicking = true)
+    const onMouseDownHandler = (event) => {
+      if (event.target.tagName === "CANVAS") clicking = true
+    }
     const onMouseUpHandler = () => (clicking = false)
 
     /**
@@ -238,6 +252,8 @@ const THREECanvas = () => {
           if (clicking) {
             dispatch(setHoveredAlbum(intersects[0].object.userData))
 
+            th.scene.updateMatrixWorld()
+            intersects[0].object.updateMatrixWorld()
             // converting 3d world pos to 2d screen pos
             const objectPos = new THREE.Vector3().copy(intersects[0].object.position)
             const vector = objectPos.project(th.camera)
@@ -287,7 +303,7 @@ const THREECanvas = () => {
     }
   }, [])
 
-  // threejs scene starts
+  // galaxy scene set up
   useEffect(() => {
     // aka page galaxy has just finished loading and querying reviews
     if (pathname === "/galaxy" && !loading && reviews.length > 0) {
@@ -322,7 +338,6 @@ const THREECanvas = () => {
               // emissiveIntensity: 1.5,
             })
           )
-          th.sphereYs.push(scoreComputed)
           sphere.position.set(dateComputed, scoreComputed, depthComputed)
           sphere.userData = { ...review }
           sphereGroup.add(sphere)
@@ -333,10 +348,37 @@ const THREECanvas = () => {
       console.log("running create sphere")
 
       th.sphereGroup = createSpheres()
-      // th.sphereGroup = tempGrp
-      // th.filteredSphereGroup = cloneDeep(tempGrp)
+
+      // addding dates
+      const lines = new THREE.Group()
+      lines.name = "lines"
+      const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.25 })
+      const planeGeometry = new THREE.PlaneGeometry(1.8, 1)
+      for (let i = 0; i <= 20; i++) {
+        // creating lin
+        const xPos = gsap.utils.mapRange(0, 20, -th.sceneSize.width / 2, th.sceneSize.width / 2, i)
+        const points = []
+        points.push(new THREE.Vector3(xPos, -5, -3))
+        points.push(new THREE.Vector3(xPos, 5, -3))
+        const geometry = new THREE.BufferGeometry().setFromPoints(points)
+        const line = new THREE.Line(geometry, lineMaterial)
+        lines.add(line)
+        // creating year name
+        const year = new THREE.Mesh(
+          planeGeometry,
+          new THREE.MeshBasicMaterial({
+            map: th.textures[i],
+            transparent: true,
+            opacity: 0.4,
+          })
+        )
+        year.position.set(xPos, 5.5, -3)
+        lines.add(year)
+      }
+      th.sphereGroup.add(lines)
+
       th.scene.add(th.sphereGroup)
-      // gsap.to(th.sphereGroup.children)
+
       const materials = th.sphereGroup.children.map((child) => child.material)
       gsap.to(materials, {
         opacity: 1,

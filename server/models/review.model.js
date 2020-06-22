@@ -14,6 +14,8 @@ const reviewSchema = new mongoose.Schema(
     review: String,
     role: String,
     score: Number,
+    link: String,
+    coverSrc: String,
   },
   {
     strictQuery: "throw",
