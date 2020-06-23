@@ -59,11 +59,6 @@ const IntroContainer = styled.div`
 
 `
 
-const Logo = styled.div`
-  .pitchfork-logo {
-    display: none;
-  }
-`
 const Intro = () => {
   return (
     <IntroContainer>
