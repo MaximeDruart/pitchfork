@@ -19,6 +19,8 @@ import img18 from "./light/2016.png"
 import img19 from "./light/2017.png"
 import img20 from "./light/2018.png"
 import img21 from "./light/2019.png"
+import score5 from "./light/2019.png"
+import score10 from "./light/2019.png"
 
 export default [
   img1,
@@ -42,4 +44,6 @@ export default [
   img19,
   img20,
   img21,
+  score5,
+  score10,
 ]

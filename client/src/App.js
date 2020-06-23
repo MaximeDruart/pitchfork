@@ -8,6 +8,7 @@ import Galaxy from "./components/interfaces/Galaxy"
 import ReviewerDetail from "./components/interfaces/ReviewerDetail"
 import Nav from "./components/Nav"
 import GalaxyPopup from "./components/interfaces/interfaceChildren/GalaxyPopup"
+import Credits from "./components/interfaces/Credits"
 
 const App = () => {
   const { pathname } = useLocation()
@@ -20,6 +21,7 @@ const App = () => {
         <Route path="/" exact component={Intro} />
         <Route path="/galaxy" exact component={Galaxy} />
         <Route path="/reviewer/:slug" component={ReviewerDetail} />
+        <Route path="/credits" exact component={Credits} />
       </Switch>
       {/* COMPONENTS ON ALL ROUTES */}
       <GalaxyPopup />

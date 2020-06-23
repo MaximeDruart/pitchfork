@@ -23,7 +23,7 @@ const StyledCanvasContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  z-index: -1;
+  z-index: ${(p) => (p.pathname.includes("/reviewer/") ? "inherit" : -1)};
   /* opacity: 0.4; */
 `
 
@@ -104,6 +104,13 @@ const THREECanvas = () => {
         th.controls.maxDistance = 50
         th.controls.minDistance = 5
         th.controls.dampingFactor = 0.05
+        th.controls.addEventListener("change", () => {
+          if (pathname === "/galaxy" && th.scene.fog) {
+            // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
+            th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
+            console.log(th.scene.fog.far)
+          }
+        })
       }
     } else th.controls = null
   }
@@ -164,35 +171,6 @@ const THREECanvas = () => {
     let mouse = new THREE.Vector2()
     let clicking = false
     let openedAlbum = false
-    /**
-     * Scene Initial Status
-     */
-
-    if (pathname === "/galaxy") {
-      console.log("litteraly fogging")
-      th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
-    }
-    th.camera.position.set(0, 0, 10)
-
-    if (pathname.includes("/reviewer/")) th.camera.position.z = -10
-    // console.log("setting camera pos")
-
-    toggleHelp(true)
-    setTimeout(() => {
-      console.log("enabling orbit")
-      toggleOrbitControls(true)
-      // toggleTrackBallControls(true)
-      th.controls &&
-        th.controls.addEventListener("change", () => {
-          if (pathname === "/galaxy") {
-            // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
-            th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
-            // update timeline
-          } else if (pathname.includes("/reviewer/")) {
-            // th.camera.lookAt(th.sphereGroup)
-          }
-        })
-    }, 100)
 
     /**
      * Raycasting
@@ -213,6 +191,8 @@ const THREECanvas = () => {
      */
 
     const hemiLight = new THREE.HemisphereLight("red", "blue", 0.38)
+    // const hemiLight = new THREE.HemisphereLight("red", "blue", 0.68)
+    // hemiLight.
     th.scene.add(hemiLight)
     const ambientLight = new THREE.AmbientLight("white", 0.59)
     th.scene.add(ambientLight)
@@ -267,6 +247,7 @@ const THREECanvas = () => {
         }
       }
 
+      // rotate
       if (pathname.includes("/reviewer/")) {
         if (th.sphereGroup.rotation) {
           th.sphereGroup.rotation.y = t / 5000
@@ -275,8 +256,6 @@ const THREECanvas = () => {
 
       // small up and down movement
       if (th.sphereGroup.position) th.sphereGroup.position.y = Math.sin(t / 500) / 50
-
-      // th.sphereInstancedMesh.instanceMatrix.needsUpdate = true
 
       th.renderer.render(th.scene, th.camera)
       stats.end()
@@ -306,106 +285,105 @@ const THREECanvas = () => {
   // galaxy scene set up
   useEffect(() => {
     // aka page galaxy has just finished loading and querying reviews
-    if (pathname === "/galaxy" && !loading && reviews.length > 0) {
-      const createSpheres = () => {
-        const sphereGroup = new THREE.Group()
-        sphereGroup.name = "sphereGroup"
+    if (pathname === "/galaxy") {
+      gsap.to(th.camera.position, {
+        x: 0,
+        y: 0,
+        z: 10,
+        duration: 0.5,
+        ease: "Power2.easeInOut",
+        onComplete: () => toggleOrbitControls(true),
+      })
+      // toggleOrbitControls(true)
+      if (!loading && reviews.length > 0) {
+        th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
 
-        filteredReviews.forEach((review) => {
-          const dateComputed = gsap.utils.mapRange(
-            0,
-            19,
-            -th.sceneSize.width / 2,
-            th.sceneSize.width / 2,
-            dateToYearPercent(review.date)
-          )
-          const scoreComputed = gsap.utils.mapRange(
-            1,
-            10,
-            -th.sceneSize.height / 2,
-            th.sceneSize.height / 2,
-            review.score
-          )
-          const depthComputed = -Math.random() * th.sceneSize.depth
-          const sphere = new THREE.Mesh(
-            th.sphere.geometry,
-            // new THREE.MeshLambertMaterial({ color: st.genresColors[review.genre], transparent: true, opacity: 1 })
-            new THREE.MeshPhongMaterial({
-              color: st.genresColors[review.genre],
+        const createSpheres = () => {
+          const sphereGroup = new THREE.Group()
+          sphereGroup.name = "sphereGroup"
+
+          filteredReviews.forEach((review) => {
+            const dateComputed = gsap.utils.mapRange(
+              0,
+              19,
+              -th.sceneSize.width / 2,
+              th.sceneSize.width / 2,
+              dateToYearPercent(review.date)
+            )
+            const scoreComputed = gsap.utils.mapRange(
+              1,
+              10,
+              -th.sceneSize.height / 2,
+              th.sceneSize.height / 2,
+              review.score
+            )
+            const depthComputed = -Math.random() * th.sceneSize.depth
+            const sphere = new THREE.Mesh(
+              th.sphere.geometry,
+              // new THREE.MeshLambertMaterial({ color: st.genresColors[review.genre], transparent: true, opacity: 1 })
+              new THREE.MeshPhongMaterial({
+                color: st.genresColors[review.genre],
+                transparent: true,
+                opacity: 0,
+                // emissive: st.genresColors[review.genre],
+                // emissiveIntensity: 1.5,
+              })
+            )
+            sphere.position.set(dateComputed, scoreComputed, depthComputed)
+            sphere.userData = { ...review }
+            sphereGroup.add(sphere)
+          })
+          return sphereGroup
+        }
+
+        console.log("running create sphere")
+
+        th.sphereGroup = createSpheres()
+
+        // addding dates
+        const lines = new THREE.Group()
+        lines.name = "lines"
+        const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.25 })
+        const planeGeometry = new THREE.PlaneGeometry(1.8, 1)
+        for (let i = 0; i <= 20; i++) {
+          // creating lin
+          const xPos = gsap.utils.mapRange(0, 20, -th.sceneSize.width / 2, th.sceneSize.width / 2, i)
+          const points = []
+          points.push(new THREE.Vector3(xPos, -5, -3))
+          points.push(new THREE.Vector3(xPos, 5, -3))
+          const geometry = new THREE.BufferGeometry().setFromPoints(points)
+          const line = new THREE.Line(geometry, lineMaterial)
+          lines.add(line)
+          // creating year name
+          const year = new THREE.Mesh(
+            planeGeometry,
+            new THREE.MeshBasicMaterial({
+              map: th.textures[i],
               transparent: true,
-              opacity: 0,
-              // emissive: st.genresColors[review.genre],
-              // emissiveIntensity: 1.5,
+              opacity: 0.4,
             })
           )
-          sphere.position.set(dateComputed, scoreComputed, depthComputed)
-          sphere.userData = { ...review }
-          sphereGroup.add(sphere)
+          year.position.set(xPos, 5.5, -3)
+          lines.add(year)
+        }
+        th.sphereGroup.add(lines)
+
+        th.scene.add(th.sphereGroup)
+
+        const materials = th.sphereGroup.children.map((child) => child.material)
+        gsap.to(materials, {
+          opacity: 1,
+          stagger: { amount: 1.2 },
+          duration: 0.5,
+          onComplete: () => setSpawnDone(true),
         })
-        return sphereGroup
       }
-
-      console.log("running create sphere")
-
-      th.sphereGroup = createSpheres()
-
-      // addding dates
-      const lines = new THREE.Group()
-      lines.name = "lines"
-      const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.25 })
-      const planeGeometry = new THREE.PlaneGeometry(1.8, 1)
-      for (let i = 0; i <= 20; i++) {
-        // creating lin
-        const xPos = gsap.utils.mapRange(0, 20, -th.sceneSize.width / 2, th.sceneSize.width / 2, i)
-        const points = []
-        points.push(new THREE.Vector3(xPos, -5, -3))
-        points.push(new THREE.Vector3(xPos, 5, -3))
-        const geometry = new THREE.BufferGeometry().setFromPoints(points)
-        const line = new THREE.Line(geometry, lineMaterial)
-        lines.add(line)
-        // creating year name
-        const year = new THREE.Mesh(
-          planeGeometry,
-          new THREE.MeshBasicMaterial({
-            map: th.textures[i],
-            transparent: true,
-            opacity: 0.4,
-          })
-        )
-        year.position.set(xPos, 5.5, -3)
-        lines.add(year)
-      }
-      th.sphereGroup.add(lines)
-
-      th.scene.add(th.sphereGroup)
-
-      const materials = th.sphereGroup.children.map((child) => child.material)
-      gsap.to(materials, {
-        opacity: 1,
-        stagger: { amount: 1.2 },
-        duration: 0.5,
-        onComplete: () => setSpawnDone(true),
-      })
-
-      /** Instanced mesh approach, thing is you can't store data for each individual instance. Not even sure that it's better performance wise */
-      // th.scene.add(th.sphereInstancedMesh)
-      // filteredReviews.forEach((review, index) => {
-      //   th.dummy.position.set(Math.random() * 15, Math.random() * 15, Math.random() * 15)
-      //   th.dummy.updateMatrix()
-      //   th.sphereInstancedMesh.setMatrixAt(index, th.dummy.matrix)
-      // })
-      // th.scene.add(new THREE.Mesh(th.sphere.geometry, th.sphere.material))
-      // console.log(th.scene.children)
     }
   }, [reviews])
 
-  // updating reviews with new filters in galaxy
+  // galaxy filter updates
   useEffect(() => {
-    // if albums have been fetched and the initial sphere render is done
-    // inplementing debouncing to that the expensive search op is executed less often
     if (pathname === "/galaxy") {
-      const timeDiff = Date.now() - lastUpdate
-      setLastUpdate(Date.now())
       if (reviews.length > 0 && !loading && spawnDone) {
         const albumNames = filteredReviews.map((review) => review.album)
         th.sphereGroup.children.forEach((sphere) => {
@@ -438,31 +416,72 @@ const THREECanvas = () => {
 
   // REVIEWERDETAIL scene setup
   useEffect(() => {
-    if (pathname.includes("/reviewer")) {
+    console.log(activeReviewer, reviews.length)
+    if (pathname.includes("/reviewer/")) {
       th.scene.position.set(0, 0, 0)
-      if (reviews.length) {
+      gsap.to(th.camera.position, {
+        x: 0,
+        y: 0,
+        z: 10,
+        duration: 0.5,
+        ease: "Power2.easeInOut",
+        onComplete: () => {
+          toggleOrbitControls(true)
+          switchControlsForReviewer()
+        },
+      })
+      if (reviews.length && activeReviewer) {
+        console.log("creating reviewer scene")
+
+        if (th.sphereGroup?.children) {
+          while (th.sphereGroup.children.length) th.sphereGroup.remove(th.sphereGroup.children[0])
+        }
+
         const range = 5
         const variationRo = 0.3
         const variationPhi = 0.7
 
         // toggleRadialHelp(true)
-        switchControlsForReviewer()
 
         const lineGroup = new THREE.Group()
         const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.4 })
         const points = []
+        points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2 + 0.05, 0))
+        points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2 - 0.05, 0))
         for (let i = 0; i < 62; i++)
           points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2, ((Math.PI * 2) / 64) * i))
-        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points)
-        const line = new THREE.Line(lineGeometry, lineMaterial)
+        points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2 + 0.05, (Math.PI * 2 * 61) / 64))
+        points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2 - 0.05, (Math.PI * 2 * 61) / 64))
 
-        lineGroup.add(line)
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points)
+        const lineAround = new THREE.Line(lineGeometry, lineMaterial)
+
+        let centerPoints = []
+        for (let i = 0; i < 65; i++)
+          centerPoints.push(
+            new THREE.Vector3().setFromSphericalCoords(range / 2, Math.PI / 2, ((Math.PI * 2) / 64) * i)
+          )
+
+        const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(centerPoints)
+        const centerLine = new THREE.Line(
+          centerLineGeometry,
+          new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.1 })
+        )
+
+        const middleAxis = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 5, 0), new THREE.Vector3(0, -5, 0)]),
+          new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.1 })
+        )
 
         const reviewsForReviewer = reviews.filter((_review) => _review.author === activeReviewer.name)
 
         th.sphereGroup = new THREE.Group()
         th.sphereGroup.name = "sphereGroup"
-        th.sphereGroup.rotation.x = degToRad(-12)
+        th.sphereGroup.rotation.z = degToRad(13)
+
+        const innerSphereGroup = new THREE.Group()
+        innerSphereGroup.name = "innerSphereGroup"
+        innerSphereGroup.visible = false
 
         reviewsForReviewer.forEach((review) => {
           const roComputed = gsap.utils.mapRange(0, 10, 0, range, review.score) // radius
@@ -476,24 +495,85 @@ const THREECanvas = () => {
             new THREE.MeshPhongMaterial({
               color: st.genresColors[review.genre],
               transparent: true,
-              opacity: 1,
+              opacity: 0,
             })
           )
           sphere.position.setFromSphericalCoords(roComputed, phiComputed, thetaComputed)
-          sphere.userData = { ...review }
-          th.sphereGroup.add(sphere)
+          sphere.position.y += gsap.utils.random(-1, 1)
+          sphere.userData = { ...review, spherical: [roComputed, phiComputed, thetaComputed] }
+          sphere.name = "sphere"
+          innerSphereGroup.add(sphere)
         })
 
+        const planeGeometry = new THREE.PlaneGeometry(0.54, 0.3)
+        const yearStart = new THREE.Mesh(
+          planeGeometry,
+          new THREE.MeshBasicMaterial({
+            map: th.textures[0],
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide,
+          })
+        )
+        const yearEnd = new THREE.Mesh(
+          planeGeometry,
+          new THREE.MeshBasicMaterial({
+            map: th.textures[th.textures.length - 1],
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide,
+          })
+        )
+        yearStart.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(4))
+        yearStart.lookAt(0, 0, 0)
+        yearStart.rotation.y += Math.PI
+        yearStart.position.y += 0.2
+        yearEnd.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(339))
+        yearEnd.lookAt(0, 0, 0)
+        yearEnd.rotation.y += Math.PI
+        yearEnd.position.y += 0.2
+
         // decoration
+        lineGroup.add(lineAround)
+        lineGroup.add(centerLine)
+        lineGroup.add(middleAxis)
+
+        const innerSphereMaterials = innerSphereGroup.children.map((child) => child.material)
+        const spawnTl = gsap
+          .timeline({
+            defaults: {
+              duration: 0.6,
+              ease: "Power3.easeInOut",
+            },
+          })
+          .addLabel("sync")
+          .from(lineAround.scale, { x: 0.01, y: 0.01, z: 0.01 })
+          .from(centerLine.scale, { x: 0.01, y: 0.01, z: 0.01, duration: 0.4 }, "-=0.32")
+          .from(middleAxis.scale, { y: 0.01, onComplete: () => (innerSphereGroup.visible = true) }, "-=0.1")
+          .to(innerSphereMaterials, {
+            opacity: 1,
+            stagger: { amount: 1.2 },
+            duration: 0.5,
+          })
+          .from([yearStart.material, yearEnd.material], { opacity: 0 })
+
+        // innerSphereGroup.children.forEach((sphere) => {
+        //   const [ro, phi, theta] = sphere.userData.spherical
+        //   sphere.position.set(new THREE.Vector3().setFromSphericalCoords(0 + t / 1000, phi + t / 1000, theta))
+        // })
+
+        th.sphereGroup.add(innerSphereGroup)
+        th.sphereGroup.add(yearStart)
+        th.sphereGroup.add(yearEnd)
         th.sphereGroup.add(lineGroup)
 
         th.scene.add(th.sphereGroup)
         console.log(th.sphereGroup)
       }
     }
-  }, [filteredReviews])
+  }, [activeReviewer, reviews.length])
 
-  return <StyledCanvasContainer ref={$canvas} />
+  return <StyledCanvasContainer pathname={pathname} ref={$canvas} />
 }
 
 export default React.memo(THREECanvas)
