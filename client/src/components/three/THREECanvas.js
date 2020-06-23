@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js"
 import gsap from "gsap"
 import ThreePlugin from "./GSAPTHREE"
 import styled from "styled-components"
@@ -28,6 +27,8 @@ const StyledCanvasContainer = styled.div`
 `
 
 const fov = 60
+
+let once = true
 
 const th = {
   scene: new THREE.Scene(),
@@ -82,6 +83,7 @@ const centerLine = new THREE.Line(
   })
 )
 centerLine.rotation.z = degToRad(13)
+centerLine.rotation.x = degToRad(10)
 centerLine.name = "centerLine"
 
 const THREECanvas = () => {
@@ -133,48 +135,52 @@ const THREECanvas = () => {
     }
   }
 
-  const toggleTrackBallControls = (isTrue = true) => {
-    th.tbcontrols = new TrackballControls(th.camera, th.renderer.domElement)
-    th.tbcontrols.mouseButtons.LEFT = THREE.MOUSE.PAN
-    th.tbcontrols.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
-    th.tbcontrols.rotateSpeed = 0.8
-    th.tbcontrols.zoomSpeed = 1
-    th.tbcontrols.panSpeed = 0.4
-    th.tbcontrols.noRotate = true
-    // th.tbcontrols.dynamicDampingFactor = 2
-
-    th.tbcontrols.keys = [65, 83, 68]
-  }
-
-  const toggleHelp = (isTrue) => {
-    if (isTrue) {
-      th.scene.add(th.axesHelper)
-      th.scene.add(th.gridHelper)
-      th.scene.add(th.cameraHelper)
-      // th.scene.add(th.polarGridHelper)
-    } else {
-      th.scene.remove(th.axesHelper)
-      th.scene.remove(th.gridHelper)
-      th.scene.add(th.cameraHelper)
-      // th.scene.remove(th.polarGridHelper)
-    }
-  }
-
-  const toggleRadialHelp = (isTrue = true) => {
-    if (isTrue) {
-      th.scene.add(th.polarGridHelper)
-    } else {
-      th.scene.remove(th.polarGridHelper)
-    }
-  }
-
   // cleaning the scene when the scene is loaded. (only useful on page transitions)
   const clearSceneOfSphereGroup = () => {
     if (th.scene?.children) {
       th.scene.children.forEach((child) => {
-        if (child.name === "sphereGroup" || child.name === "centerLine") th.scene.remove(child)
+        if (child.name === "sphereGroup" || child.name === "centerLine" || child.name === "yearLines")
+          th.scene.remove(child)
       })
     }
+  }
+
+  const getLinesGroupGalaxy = () => {
+    const lines = new THREE.Group()
+    lines.name = "yearLines"
+    const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.18 })
+    for (let i = 0; i <= 20; i++) {
+      // creating lin
+      const xPos = gsap.utils.mapRange(0, 20, -th.sceneSize.width / 2, th.sceneSize.width / 2, i)
+      const points = []
+      points.push(new THREE.Vector3(xPos, -5, -3))
+      points.push(new THREE.Vector3(xPos, 5, -3))
+      const geometry = new THREE.BufferGeometry().setFromPoints(points)
+      const line = new THREE.Line(geometry, lineMaterial)
+      lines.add(line)
+    }
+    return lines
+  }
+
+  const getLabelsGroupGalaxy = () => {
+    const labels = new THREE.Group()
+    labels.name = "yearLabels"
+    const planeGeometry = new THREE.PlaneGeometry(1.8, 1)
+    for (let i = 0; i <= 20; i++) {
+      const xPos = gsap.utils.mapRange(0, 20, -th.sceneSize.width / 2, th.sceneSize.width / 2, i)
+
+      const year = new THREE.Mesh(
+        planeGeometry,
+        new THREE.MeshBasicMaterial({
+          map: th.textures[i],
+          transparent: true,
+          opacity: 0.4,
+        })
+      )
+      year.position.set(xPos, 5.5, -3)
+      labels.add(year)
+    }
+    return labels
   }
 
   // threejs scene
@@ -305,21 +311,29 @@ const THREECanvas = () => {
   useEffect(() => {
     // aka page galaxy has just finished loading and querying reviews
     if (pathname === "/galaxy") {
-      gsap.to(th.camera.position, {
+      gsap.set(th.camera.position, {
         x: 0,
         y: 0,
-        z: 10,
+        z: 17,
         duration: 0.5,
         ease: "Power2.easeInOut",
-        onComplete: () => toggleOrbitControls(true),
+        onComplete: () => {
+          toggleOrbitControls(true)
+          th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
+        },
       })
-      if (!loading && reviews.length > 0) {
-        th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
 
-        console.log("galaxy scene booting")
-        if (th.infiniteRotationTl) {
-          clearInterval(th.infiniteRotationTl)
-        }
+      const lines = getLinesGroupGalaxy()
+      if (!th.scene.children.some((child) => child.name === "yearLines") && !reviews.length) {
+        th.scene.add(lines)
+        gsap.from(lines.children, { duration: 0.6, stagger: 0.1, three: { scaleY: 0.001 } })
+      }
+
+      // animate lines
+
+      if (!loading && reviews.length > 0) {
+        th.infiniteRotationTl && clearInterval(th.infiniteRotationTl)
+
         clearSceneOfSphereGroup()
 
         const createSpheres = () => {
@@ -360,45 +374,25 @@ const THREECanvas = () => {
           return sphereGroup
         }
 
-        console.log("running create sphere")
-
         th.sphereGroup = createSpheres()
 
-        // addding dates
-        const lines = new THREE.Group()
-        lines.name = "lines"
-        const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.25 })
-        const planeGeometry = new THREE.PlaneGeometry(1.8, 1)
-        for (let i = 0; i <= 20; i++) {
-          // creating lin
-          const xPos = gsap.utils.mapRange(0, 20, -th.sceneSize.width / 2, th.sceneSize.width / 2, i)
-          const points = []
-          points.push(new THREE.Vector3(xPos, -5, -3))
-          points.push(new THREE.Vector3(xPos, 5, -3))
-          const geometry = new THREE.BufferGeometry().setFromPoints(points)
-          const line = new THREE.Line(geometry, lineMaterial)
-          lines.add(line)
-          // creating year name
-          const year = new THREE.Mesh(
-            planeGeometry,
-            new THREE.MeshBasicMaterial({
-              map: th.textures[i],
-              transparent: true,
-              opacity: 0.4,
-            })
-          )
-          year.position.set(xPos, 5.5, -3)
-          lines.add(year)
-        }
-        th.sphereGroup.add(lines)
-
         th.scene.add(th.sphereGroup)
+
+        const labels = getLabelsGroupGalaxy()
+        const lines = getLinesGroupGalaxy()
+        th.sphereGroup.add(labels)
+        th.sphereGroup.add(lines)
+        const labelsMaterials = labels.children.map((child) => child.material)
+        gsap.from(labelsMaterials, {
+          opacity: 0,
+          duration: 0.9,
+        })
 
         const materials = th.sphereGroup.children.map((child) => child.material)
         materials &&
           gsap.to(materials, {
             opacity: 1,
-            stagger: { amount: 1.2 },
+            stagger: { amount: 1.7 },
             duration: 0.5,
             onComplete: () => setSpawnDone(true),
           })
@@ -428,20 +422,18 @@ const THREECanvas = () => {
     if (pathname.includes("/reviewer/")) {
       !th.scene.children.some((child) => child.name === "centerLine") && !reviews.length && th.scene.add(centerLine)
       th.scene.position.set(0, 0, 0)
-      gsap.to(th.camera.position, {
+      gsap.set(th.camera.position, {
         x: 0,
         y: 0,
         z: 10,
-        duration: 0.5,
-        ease: "Power2.easeInOut",
         onComplete: () => {
           toggleOrbitControls(true)
           switchControlsForReviewer()
+          if (th.camera.position.z !== 10) th.camera.position.z = 10
         },
       })
       if (reviews.length && activeReviewer) {
-        console.log("creating reviewer scene")
-
+        th.scene.fog = null
         clearSceneOfSphereGroup()
 
         const range = 5
@@ -632,7 +624,7 @@ const THREECanvas = () => {
         // infinite rotation
         if (!th.infiniteRotationTl) {
           th.infiniteRotationTl = setInterval(() => {
-            th.sphereGroup.rotation.y += 0.003
+            th.sphereGroup.rotation.y -= 0.003
           }, 15)
         }
       } else {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useReducer } from "react"
+import React, { useMemo, useReducer } from "react"
 import styled from "styled-components"
 
 // Import icons
@@ -128,7 +128,6 @@ const reducer = (state, action) => {
         })
       }
       return newState
-      break
 
     case "SORT_REVIEWCOUNT":
       const newState2 = { ...state }
@@ -145,7 +144,6 @@ const reducer = (state, action) => {
       }
       console.log(state, newState2)
       return newState2
-      break
 
     default:
       return state
@@ -184,7 +182,7 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
           <div className="section"></div>
         </StyledAllReviewers>
       )),
-    [reviewSort]
+    [reviewSort, openReviewer]
   )
 
   return (
