@@ -61,13 +61,28 @@ const th = {
   },
   textures: [],
   scoreTextures: [],
+  infiniteRotationTl: "",
 }
 th.cameraHelper = new THREE.CameraHelper(th.camera)
 th.sphere.mesh = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
 th.polarGridHelper.material.transparent = true
 th.polarGridHelper.material.opacity = 0.3
 
-// th.sphereInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+let centerPoints = []
+for (let i = 0; i < 65; i++)
+  centerPoints.push(new THREE.Vector3().setFromSphericalCoords(5 / 2, Math.PI / 2, ((Math.PI * 2) / 64) * i))
+
+const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(centerPoints)
+const centerLine = new THREE.Line(
+  centerLineGeometry,
+  new THREE.LineBasicMaterial({
+    color: "white",
+    transparent: true,
+    opacity: 0.25,
+  })
+)
+centerLine.rotation.z = degToRad(13)
+centerLine.name = "centerLine"
 
 const THREECanvas = () => {
   const $canvas = useRef(null)
@@ -83,27 +98,39 @@ const THREECanvas = () => {
   const dispatch = useDispatch()
 
   const toggleOrbitControls = (isTrue) => {
-    if (isTrue) {
-      if (!th.controls) {
-        th.controls = new OrbitControls(th.camera, th.renderer.domElement)
-        th.controls.enableDamping = true
-        th.controls.enableRotate = false
-        th.controls.mouseButtons.LEFT = THREE.MOUSE.PAN
-        th.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
-        // th.controls.screenSpacePanning = true
-        th.controls.panSpeed = 2
+    if (!th.controls) {
+      th.controls = new OrbitControls(th.camera, th.renderer.domElement)
+    } else {
+      th.controls.reset()
+    }
+    th.controls.enableDamping = true
+    th.controls.enableRotate = false
+    th.controls.enableZoom = true
 
-        th.controls.maxDistance = 50
-        th.controls.minDistance = 5
-        th.controls.dampingFactor = 0.05
-        th.controls.addEventListener("change", () => {
-          if (pathname === "/galaxy" && th.scene.fog) {
-            // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
-            th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
-          }
-        })
+    th.controls.mouseButtons.LEFT = THREE.MOUSE.PAN
+    th.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
+    // th.controls.screenSpacePanning = true
+    th.controls.panSpeed = 2
+
+    th.controls.maxDistance = 50
+    th.controls.minDistance = 5
+    th.controls.dampingFactor = 0.05
+    th.controls.addEventListener("change", () => {
+      if (pathname === "/galaxy" && th.scene.fog) {
+        // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
+        th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
       }
-    } else th.controls = null
+    })
+  }
+
+  const switchControlsForReviewer = (bool = true) => {
+    if (th.controls) {
+      th.controls.reset()
+      th.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE
+      th.controls.mouseButtons.RIGHT = null
+      th.controls.enableRotate = true
+      th.controls.enableZoom = false
+    }
   }
 
   const toggleTrackBallControls = (isTrue = true) => {
@@ -141,12 +168,12 @@ const THREECanvas = () => {
     }
   }
 
-  const switchControlsForReviewer = () => {
-    if (th.controls) {
-      th.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE
-      th.controls.mouseButtons.RIGHT = null
-      th.controls.enableRotate = true
-      th.controls.enableZoom = false
+  // cleaning the scene when the scene is loaded. (only useful on page transitions)
+  const clearSceneOfSphereGroup = () => {
+    if (th.scene?.children) {
+      th.scene.children.forEach((child) => {
+        if (child.name === "sphereGroup" || child.name === "centerLine") th.scene.remove(child)
+      })
     }
   }
 
@@ -245,13 +272,6 @@ const THREECanvas = () => {
         }
       }
 
-      // rotate
-      if (pathname.includes("/reviewer/")) {
-        if (th.sphereGroup.rotation) {
-          th.sphereGroup.rotation.y = t / 5000
-        }
-      }
-
       // small up and down movement
       if (th.sphereGroup.position) th.sphereGroup.position.y = Math.sin(t / 500) / 50
 
@@ -293,9 +313,14 @@ const THREECanvas = () => {
         ease: "Power2.easeInOut",
         onComplete: () => toggleOrbitControls(true),
       })
-      // toggleOrbitControls(true)
       if (!loading && reviews.length > 0) {
         th.scene.fog = new THREE.Fog(th.fog.color, th.fog.near, Math.max(th.camera.position.z * 1.8, th.fog.far))
+
+        console.log("galaxy scene booting")
+        if (th.infiniteRotationTl) {
+          clearInterval(th.infiniteRotationTl)
+        }
+        clearSceneOfSphereGroup()
 
         const createSpheres = () => {
           const sphereGroup = new THREE.Group()
@@ -378,7 +403,7 @@ const THREECanvas = () => {
         })
       }
     }
-  }, [reviews])
+  }, [reviews, pathname])
 
   // galaxy filter updates
   useEffect(() => {
@@ -386,11 +411,12 @@ const THREECanvas = () => {
       if (reviews.length > 0 && !loading && spawnDone) {
         const albumNames = filteredReviews.map((review) => review.album)
         th.sphereGroup.children.forEach((sphere) => {
-          gsap.to(sphere.material, {
-            duration: 0.8,
-            ease: "Power2.easeOut",
-            opacity: albumNames.includes(sphere.userData.album) ? 1 : 0.16,
-          })
+          sphere.material &&
+            gsap.to(sphere.material, {
+              duration: 0.8,
+              ease: "Power2.easeOut",
+              opacity: albumNames.includes(sphere.userData.album) ? 1 : 0.16,
+            })
         })
       }
     }
@@ -399,6 +425,7 @@ const THREECanvas = () => {
   // REVIEWERDETAIL scene setup
   useEffect(() => {
     if (pathname.includes("/reviewer/")) {
+      !th.scene.children.some((child) => child.name === "centerLine") && !reviews.length && th.scene.add(centerLine)
       th.scene.position.set(0, 0, 0)
       gsap.to(th.camera.position, {
         x: 0,
@@ -414,12 +441,9 @@ const THREECanvas = () => {
       if (reviews.length && activeReviewer) {
         console.log("creating reviewer scene")
 
-        if (th.sphereGroup?.children) {
-          while (th.sphereGroup.children.length) th.sphereGroup.remove(th.sphereGroup.children[0])
-        }
+        clearSceneOfSphereGroup()
 
         const range = 5
-        // toggleRadialHelp(true)
 
         const lineGroup = new THREE.Group()
         const lineMaterial = new THREE.LineBasicMaterial({
@@ -553,7 +577,6 @@ const THREECanvas = () => {
         )
         scoreLabel2.position.y = 3
         scoreLabel3.position.y = -3
-        // scoreLabel.rotation.x = degToRad(-90)
 
         yearStartLabel.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(4))
         yearStartLabel.lookAt(0, 0, 0)
@@ -574,6 +597,8 @@ const THREECanvas = () => {
         th.sphereGroup.add(innerSphereGroup)
         th.sphereGroup.add(lineGroup)
         th.scene.add(th.sphereGroup)
+
+        console.log(th.scene.children)
 
         const labelsMaterials = [
           scoreLabel1.material,
@@ -602,6 +627,16 @@ const THREECanvas = () => {
             duration: 0.5,
           })
           .from(labelsMaterials, { opacity: 0 })
+
+        // infinite rotation
+        if (!th.infiniteRotationTl) {
+          th.infiniteRotationTl = setInterval(() => {
+            th.sphereGroup.rotation.y += 0.003
+          }, 15)
+        }
+      } else {
+        !reviews.length &&
+          gsap.to(centerLine.scale, { duration: 0.6, x: 0.01, y: 0.01, z: 0.01, yoyo: true, repeat: -1 })
       }
     }
   }, [activeReviewer, reviews.length])
