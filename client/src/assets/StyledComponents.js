@@ -45,23 +45,43 @@ export const Button = styled.button`
 
 export const NavButton = styled(Link)`
   display: inline-block;
-  border: 1px solid white;
-  text-transform: uppercase;
+  position: relative;
   padding: 1.2rem 2.4rem;
   margin: 0;
-  text-decoration: none;
+  background: transparent;
+  border: 1px solid white;
   color: #ffffff;
   font-size: 1rem;
-  cursor: pointer;
+  text-transform: uppercase;
   text-align: center;
-  transition: 0.6s;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.8s;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background: transparent;
 
   &:hover,
   &:focus {
+    color: black;
+  }
+
+  &:hover:before {
+    position: absolute;
+    left: 0%;
+    width: 100%;
+  }
+
+  &:before {
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 0px;
+    height: 100%;
+    z-index: -1;
+    content: '';
     background: white;
     color: black;
+    transition: all 0.5s ease-in-out;
   }
 `
