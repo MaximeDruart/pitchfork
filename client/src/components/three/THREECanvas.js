@@ -52,7 +52,7 @@ const th = {
   sceneSize: {
     width: 140,
     height: 16,
-    depth: 60, // keeping a 50th of sampleSize seems good
+    depth: 52, // keeping a 50th of sampleSize seems good
   },
   fog: {
     near: 10,
@@ -395,12 +395,13 @@ const THREECanvas = () => {
         th.scene.add(th.sphereGroup)
 
         const materials = th.sphereGroup.children.map((child) => child.material)
-        gsap.to(materials, {
-          opacity: 1,
-          stagger: { amount: 1.2 },
-          duration: 0.5,
-          onComplete: () => setSpawnDone(true),
-        })
+        materials &&
+          gsap.to(materials, {
+            opacity: 1,
+            stagger: { amount: 1.2 },
+            duration: 0.5,
+            onComplete: () => setSpawnDone(true),
+          })
       }
     }
   }, [reviews, pathname])

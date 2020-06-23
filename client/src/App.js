@@ -10,6 +10,11 @@ import Nav from "./components/Nav"
 import GalaxyPopup from "./components/interfaces/interfaceChildren/GalaxyPopup"
 import Credits from "./components/interfaces/Credits"
 import Music from "./components/Music"
+import styled from "styled-components"
+
+const Logo = styled.div`
+  position: fixed;
+`
 
 const App = () => {
   const { pathname } = useLocation()
@@ -29,6 +34,9 @@ const App = () => {
       {/* COMPONENTS ON ALL ROUTES */}
       <GalaxyPopup />
       {pathname !== "/" && <Nav />}
+      <Route exact path={["/", "/galaxy", "/credits"]}>
+        <Logo>Pitchfork</Logo>
+      </Route>
       <THREECanvas />
       <Music />
     </div>
