@@ -71,33 +71,31 @@ const MusicContainer = styled.div`
   }
 `
 
-const audio = new Audio(waterMusic)
-audio.volume = 0
-
 const Music = () => {
-  const [dum, setDum] = useState("dummy")
-  const [firstInteraction, setFirstInteraction] = useState(true)
+  const [audio] = useState(new Audio(waterMusic))
+  const [dum, setDum] = useState("test")
 
   const fadeAudio = () =>
-    gsap.to(audio, { volume: audio.volume ? 0 : 0.3, duration: 1.3, onComplete: setDum(audio.volume) })
+    gsap.to(audio, { volume: audio.volume ? 0 : 0.3, duration: 1.3, onStart: () => setDum(audio.volume) })
 
   useEffect(() => {
+    audio.volume = 0.3
     const playAudio = () => audio.play()
 
-    window.addEventListener("click", () => {
-      if (firstInteraction) {
-        fadeAudio()
+    window.addEventListener(
+      "click",
+      () => {
         playAudio()
-        setFirstInteraction(false)
-      }
-    })
+        setDum("zooooomz")
+      },
+      { once: true }
+    )
     audio.addEventListener("ended", playAudio)
     return () => audio.removeEventListener("ended", playAudio)
-  }, [audio, firstInteraction])
+  }, [])
 
   return (
-    <MusicContainer dum={dum} paused={audio.paused} volume={audio.volume}>
-      {console.log(audio.volume)}
+    <MusicContainer dum={dum} volume={audio.volume}>
       <div onClick={fadeAudio} className="play">
         <span className="equalizer">
           <span className="equalizerBar equalizer1"></span>

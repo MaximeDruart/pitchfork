@@ -28,8 +28,6 @@ const StyledCanvasContainer = styled.div`
 
 const fov = 60
 
-let once = true
-
 const th = {
   scene: new THREE.Scene(),
   camera: new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 150),

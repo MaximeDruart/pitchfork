@@ -182,7 +182,8 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
           <div className="section"></div>
         </StyledAllReviewers>
       )),
-    [reviewSort, openReviewer]
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+    [reviewSort]
   )
 
   return (
