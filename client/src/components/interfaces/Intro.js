@@ -17,6 +17,10 @@ const IntroContainer = styled.div`
   }
   .text-container {
     margin-bottom: 15px;
+    a {
+      text-decoration: none;
+      cursor: pointer;
+    }
     .over-title {
       font-family: "Noto Serif", serif;
       font-size: 20px;
@@ -35,13 +39,19 @@ const IntroContainer = styled.div`
       font-family: "Oswald-Light";
     }
   }
-  .over-title{
+  .over-title a{
     display: flex;
     align-items: center;
+    cursor: pointer;
     img{
       width: 20px;
       height: 20px;
       margin-right: 10px;
+      z-index: 1000;
+    }
+    p{
+      margin: 0;
+      z-index: 1000;
     }
   }
   .intro-button {
@@ -53,8 +63,10 @@ const Intro = () => {
     <IntroContainer>
       <div className="text-container">
         <div className="over-title">
-          <img src={pitchforkLogo} alt="Pitchfork logo"></img>
-          Pitchfork
+          <a href="https://pitchfork.com/" target="_blank">
+            <img src={pitchforkLogo} alt="Pitchfork logo"></img>
+            <p>Pitchfork</p>
+          </a>
         </div>
         <div className="title">
           reviewing the <br></br> reviews

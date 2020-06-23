@@ -116,6 +116,11 @@ const Galaxy = () => {
 
   return (
     <StyledGalaxy>
+      <StyledPitchforkLogo>
+        <div className="pitchfork-logo">
+          <img src={pitchforkLogo} alt="Pitchfork logo"></img>
+        </div>
+      </StyledPitchforkLogo>
       <GalaxySearchBar />
       <div className="scores">
         <div onClick={toggleAllScores} className="scores-title filter-title">
@@ -136,6 +141,7 @@ const Galaxy = () => {
     </StyledGalaxy>
   )
 }
+
 
 const StyledGalaxy = styled.div`
   .scores,
@@ -196,11 +202,14 @@ const StyledGenreItem = styled.div`
   letter-spacing: 1px;
 `
 
-const StyledPitchforkLink = styled.div`
-  img {
-    width: 20px;
-    height: 20px;
-    color: white;
+const StyledPitchforkLogo = styled.div`
+  .pitchfork-logo {
+    img{
+      width: 20px;
+      height: 20px;
+      color: white;
+      z-index: 10000;
+    }
   }
 `
 
