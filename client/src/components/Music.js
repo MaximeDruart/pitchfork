@@ -6,7 +6,7 @@ import gsap from "gsap"
 const MusicContainer = styled.div`
   position: absolute;
   bottom: 10vh;
-  right: 10vw;
+  right: 8vw;
   z-index: 1000;
   color: white;
   cursor: pointer;
