@@ -7,6 +7,9 @@ import GalaxySearchBar from "./interfaceChildren/GalaxySearchBar"
 import gsap from "gsap"
 import { useRef } from "react"
 
+// Import icons
+import pitchforkLogo from "../../assets/icons/logo-pitchfork.svg"
+
 const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 const Galaxy = () => {
@@ -140,7 +143,7 @@ const StyledGalaxy = styled.div`
     position: absolute;
     width: 12vw;
     height: 100vh;
-    margin-top: 13vh;
+    margin-top: 18vh;
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
@@ -149,6 +152,10 @@ const StyledGalaxy = styled.div`
   }
   .genres {
     left: 11vw;
+    align-items: flex-start;
+  }
+  .scores {
+    left: 4vw;
     align-items: flex-start;
   }
 
@@ -172,8 +179,8 @@ const StyledScoreItem = styled.div`
   opacity: ${(props) => (props.active ? "1" : "0.5")};
   font-family: ${(props) => (props.active ? "Oswald-Medium" : "Oswald-Light")};
   transition: ${(props) => (props.done ? "all 0.3s ease-in-out;" : "done")};
-  font-size: ${st.fzSmall};
-  text-align: right;
+  font-size: ${st.fzMedium};
+  text-align: left;
   cursor: pointer;
   margin-bottom: 20px;
 `
@@ -182,11 +189,19 @@ const StyledGenreItem = styled.div`
   font-family: ${(props) => (props.active ? "Oswald-Medium" : "Oswald-Regular")};
   color: ${(props) => (props.active ? st.genresColors[props.genre] : st.txtGrey)};
   transition: ${(props) => (props.done ? "all 0.3s ease-in-out;" : "done")};
-  font-size: ${st.fzSmall};
+  font-size: ${st.fzMedium};
   margin-bottom: 20px;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
+`
+
+const StyledPitchforkLink = styled.div`
+  img {
+    width: 20px;
+    height: 20px;
+    color: white;
+  }
 `
 
 export default Galaxy

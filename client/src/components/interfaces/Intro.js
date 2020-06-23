@@ -2,6 +2,9 @@ import React from "react"
 import styled from "styled-components"
 import { NavButton } from "../../assets/StyledComponents"
 
+// Import icons 
+import pitchforkLogo from "../../assets/icons/logo-pitchfork.svg"
+
 const IntroContainer = styled.div`
   z-index: 10;
   width: 100%;
@@ -32,6 +35,15 @@ const IntroContainer = styled.div`
       font-family: "Oswald-Light";
     }
   }
+  .over-title{
+    display: flex;
+    align-items: center;
+    img{
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+  }
   .intro-button {
   }
 `
@@ -40,7 +52,10 @@ const Intro = () => {
   return (
     <IntroContainer>
       <div className="text-container">
-        <div className="over-title">Pitchfork</div>
+        <div className="over-title">
+          <img src={pitchforkLogo} alt="Pitchfork logo"></img>
+          Pitchfork
+        </div>
         <div className="title">
           reviewing the <br></br> reviews
         </div>

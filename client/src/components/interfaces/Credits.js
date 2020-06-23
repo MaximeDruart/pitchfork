@@ -9,7 +9,6 @@ import linkedin from "../../assets/icons/linkedin.svg"
 import github from "../../assets/icons/github.svg"
 
 const CreditsContainer = styled.div`
-  background-color: #0c0a17;
   font-family: "Oswald-Light";
   color: white;
   .header{
