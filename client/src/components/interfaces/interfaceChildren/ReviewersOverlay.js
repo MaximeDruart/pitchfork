@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useMemo, useReducer } from "react"
 import styled from "styled-components"
 
 // Import icons
@@ -12,6 +12,8 @@ const StyledOverlay = styled.div`
   height: 100vh;
   background-color: #0c0a17;
   overflow: scroll;
+  z-index: 2000;
+  position: fixed;
   .header {
     margin-bottom: 15px;
     .container {
@@ -33,7 +35,7 @@ const StyledOverlay = styled.div`
         display: flex;
         justify-content: space-between;
         flex-direction: row;
-        width: 1100px;
+        width: 100%;
         margin: 0 auto;
         text-transform: uppercase;
         font-family: "Oswald-ExtraLight";
@@ -41,7 +43,6 @@ const StyledOverlay = styled.div`
         .right {
           display: flex;
           justify-content: space-between;
-          width: 460px;
           align-self: flex-end;
           font-family: "Oswald-ExtraLight";
           .genres-filter {
@@ -79,13 +80,15 @@ const StyledAllReviewers = styled.div`
     letter-spacing: 2px;
     .left {
       font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
     }
     .right {
       display: flex;
       justify-content: space-between;
       width: 460px;
       .genre,
-      .reviews {
+      .reviewers {
         font-family: "Oswald-ExtraLight";
       }
     }
@@ -98,25 +101,91 @@ const StyledAllReviewers = styled.div`
   }
 `
 
+const reducer = (state, action) => {
+  console.log("dispatched")
+  switch (action.type) {
+    case "SORT_NAME":
+      const newState = { ...state }
+      newState.sortedName[0] = true
+      newState.sortedReviewCount[0] = false
+      if (state.sortedName[1] === 0) {
+        newState.sortedName[1] = 1
+        newState.reviewers = state.reviewers.sort((a, b) => {
+          var nameA = a.name.toUpperCase() // ignore upper and lowercase
+          var nameB = b.name.toUpperCase() // ignore upper and lowercase
+          if (nameA < nameB) return -1
+          if (nameA > nameB) return 1
+          return 0
+        })
+      } else if (state.sortedName[1] === 1) {
+        newState.sortedName[1] = 0
+        newState.reviewers = state.reviewers.sort((a, b) => {
+          var nameA = a.name.toUpperCase() // ignore upper and lowercase
+          var nameB = b.name.toUpperCase() // ignore upper and lowercase
+          if (nameA > nameB) return -1
+          if (nameA < nameB) return 1
+          return 0
+        })
+      }
+      return newState
+      break
+
+    case "SORT_REVIEWCOUNT":
+      const newState2 = { ...state }
+      newState2.sortedName[0] = false
+      newState2.sortedReviewCount[0] = true
+      if (state.sortedReviewCount[1] === 0) {
+        console.log("asc count")
+        newState2.sortedReviewCount[1] = 1
+        newState2.reviewers = state.reviewers.sort((revA, revB) => revA.reviewCount - revB.reviewCount)
+      } else if (state.sortedReviewCount[1] === 1) {
+        console.log("desc count")
+        newState2.sortedReviewCount[1] = 0
+        newState2.reviewers = state.reviewers.sort((revA, revB) => revB.reviewCount - revA.reviewCount)
+      }
+      console.log(state, newState2)
+      return newState2
+      break
+
+    default:
+      return state
+  }
+}
+
 const ReviewersOverlay = ({ show, setShow, reviewers }) => {
+  const [reviewSort, dispatch] = useReducer(reducer, {
+    sortedName: [true, 0],
+    sortedReviewCount: [false, 0],
+    reviewers,
+  })
+
   const history = useHistory()
 
-  const mappedReviewers = reviewers.map((reviewer) => (
-    <StyledAllReviewers key={reviewer._id}>
-      <div className="reviewer">
-        <div onClick={() => history.push(`/reviewer/${reviewer.slug}`)} className="left">
-          {reviewer.name}
-        </div>
-        <div className="right">
-          <div className="genre">{reviewer.preferedGenre}</div>
-          <div className="reviews">
-            {reviewer.reviewCount} review{reviewer.reviewCount > 1 && "s"}
+  const openReviewer = (slug) => {
+    history.push(`/reviewer/${slug}`)
+    setShow(false)
+  }
+
+  const mappedReviewers = useMemo(
+    () =>
+      reviewSort.reviewers.map((reviewer) => (
+        <StyledAllReviewers key={reviewer._id}>
+          <div className="reviewer">
+            <div onClick={() => openReviewer(reviewer.slug)} className="left">
+              {reviewer.name}
+            </div>
+            <div className="right">
+              <div className="genre">{reviewer.preferedGenre}</div>
+              <div className="reviews">
+                {reviewer.reviewCount} review{reviewer.reviewCount > 1 && "s"}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div className="section"></div>
-    </StyledAllReviewers>
-  ))
+          <div className="section"></div>
+        </StyledAllReviewers>
+      )),
+    [reviewSort]
+  )
 
   return (
     <StyledOverlay show={show}>
@@ -127,17 +196,26 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
           </div>
           <div className="filters">
             <div className="left">
-              filter names
-              <img alt="" className="filter-button" src={filterButton}></img>
+              <span>names</span>
+              <img
+                onClick={() => dispatch({ type: "SORT_NAME" })}
+                alt=""
+                className="filter-button"
+                src={filterButton}
+              ></img>
             </div>
             <div className="right">
-              <div className="genres-filter">
-                select genres
-                <img alt="" className="filter-button" src={filterButton}></img>
-              </div>
               <div>
-                number of reviews
-                <img alt="" className="filter-button" src={filterButton}></img>
+                <span>reviews</span>
+                <img
+                  onClick={() => {
+                    dispatch({ type: "SORT_REVIEWCOUNT" })
+                    console.log("click !")
+                  }}
+                  alt=""
+                  className="filter-button"
+                  src={filterButton}
+                ></img>
               </div>
             </div>
           </div>
