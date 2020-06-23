@@ -17,9 +17,9 @@ const Nav = () => {
           <div className="nav-bar"></div>
           <div className="nav-link-text">reviewers</div>
         </NavLink>
-        <NavLink to="/else" className="nav-element">
+        <NavLink to="/credits" className="nav-element nav-small">
           <div className="nav-bar"></div>
-          <div className="nav-link-text">else</div>
+          <div className="nav-link-text">credits</div>
         </NavLink>
       </div>
     </StyledNav>
@@ -76,6 +76,13 @@ const StyledNav = styled.nav`
         .nav-link-text {
           opacity: 1;
         }
+      }
+    }
+    .nav-small {
+      .nav-bar {
+        /* width: 3px;
+        height: 60%; */
+        opacity: 0.3;
       }
     }
   }

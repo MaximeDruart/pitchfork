@@ -562,14 +562,15 @@ const THREECanvas = () => {
         const scoreLabel3 = new THREE.Mesh(
           planeScoreGeometry,
           new THREE.MeshBasicMaterial({
-            map: th.scoreTextures[1],
+            map: th.scoreTextures[2],
             transparent: true,
             opacity: 0.4,
             side: THREE.DoubleSide,
           })
         )
-        scoreLabel2.position.y = 3
-        scoreLabel3.position.y = -3
+        scoreLabel1.position.y = -3
+        scoreLabel2.position.y = 0
+        scoreLabel3.position.y = 3
 
         yearStartLabel.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(4))
         yearStartLabel.lookAt(0, 0, 0)
