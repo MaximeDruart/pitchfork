@@ -12,44 +12,51 @@ const StyledOverlay = styled.div`
   height: 100vh;
   background-color: #0C0A17;
   overflow: scroll;
-  .container {
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
-    width: 1100px;
-    .filters {
+  .header {
+    margin-bottom: 15px;
+    .container {
       display: flex;
-      justify-content: space-between;
-      flex-direction: row;
-      width: 1100px;
+      flex-direction: column;
       margin: 0 auto;
-      text-transform: uppercase;
-      font-family: "Oswald-ExtraLight";
-      letter-spacing: 4px;
-      cursor: pointer;
-      .right {
+      width: 1100px;
+      .goBack {
+        img {
+          height: 25px;
+          width: 25px;
+          color: white;
+          cursor: pointer;
+          margin-top: 30px;
+          margin-bottom: 50px;
+        }
+      }
+      .filters {
         display: flex;
         justify-content: space-between;
-        width: 460px;
-        align-self: flex-end;
+        flex-direction: row;
+        width: 1100px;
+        margin: 0 auto;
+        text-transform: uppercase;
         font-family: "Oswald-ExtraLight";
+        letter-spacing: 4px;
+        .right {
+          display: flex;
+          justify-content: space-between;
+          width: 460px;
+          align-self: flex-end;
+          font-family: "Oswald-ExtraLight";
+          .genres-filter {
+            padding-bottom: 5px;
+            border-bottom: 1px solid white;
+          }
+        }
+        img{
+          width: 13px;
+          height: 13px;
+          margin-left: 16px;
+          color: white;
+          cursor: pointer;
+        }
       }
-      img{
-        width: 13px;
-        height: 13px;
-        margin-left: 3px;
-        color: white;
-      }
-    }
-  }
-  .goBack {
-    img {
-      height: 25px;
-      width: 25px;
-      color: white;
-      cursor: pointer;
-      margin-top: 30px;
-      margin-bottom: 50px;
     }
   }
 
@@ -71,16 +78,15 @@ const StyledAllReviewers = styled.div`
     font-size: 25px;
     letter-spacing: 2px;
     .left {
-      font-weight: 500;
+      font-weight: 600;
     }
     .right {
       display: flex;
       justify-content: space-between;
       width: 460px;
-      text-align: right;
       .genre,
       .reviews {
-        font-weight: 200;
+        font-family: "Oswald-ExtraLight";
       }
     }
   }
@@ -125,7 +131,7 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
               <img className="filter-button" src={filterButton}></img>
             </div>
             <div className="right">
-              <div>
+              <div className="genres-filter">
                 select genres
                 <img className="filter-button" src={filterButton}></img>
               </div>
