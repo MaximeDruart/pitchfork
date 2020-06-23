@@ -27,6 +27,7 @@ const MusicContainer = styled.div`
       animation-iteration-count: infinite;
       animation-timing-function: ease;
       animation-fill-mode: both;
+      animation-name: ${(p) => (!p.volume ? "equalizer-play" : "equalizer-ended")};
     }
     .equalizer1 {
       left: 0;
@@ -49,43 +50,54 @@ const MusicContainer = styled.div`
       animation-duration: 0.66s;
     }
     @keyframes equalizer-play {
-    0% { height : 8px; }
-    100% { height : 8px; }
-    50% { height : 20px;}
+      0% {
+        height: 8px;
+      }
+      100% {
+        height: 8px;
+      }
+      50% {
+        height: 20px;
+      }
     }
     @keyframes equalizer-ended {
-    0% { height : 15px;}
-    100% { height : 3px;}
+      0% {
+        height: 3px;
+      }
+      100% {
+        height: 3px;
+      }
     }
   }
 `
 
+const audio = new Audio(waterMusic)
+audio.volume = 0
+
 const Music = () => {
-  const [audio, setAudio] = useState(new Audio(waterMusic))
+  const [dum, setDum] = useState("dummy")
   const [firstInteraction, setFirstInteraction] = useState(true)
 
-  const fadeAudio = () => gsap.to(audio, { volume: audio.volume ? 0 : 0.3, duration: 1.3 })
+  const fadeAudio = () =>
+    gsap.to(audio, { volume: audio.volume ? 0 : 0.3, duration: 1.3, onComplete: setDum(audio.volume) })
 
   useEffect(() => {
-    audio.volume = 0.3
-
     const playAudio = () => audio.play()
 
-    audio.addEventListener("ended", playAudio)
     window.addEventListener("click", () => {
       if (firstInteraction) {
+        fadeAudio()
         playAudio()
         setFirstInteraction(false)
       }
     })
-    return () => {
-      // window.removeEventListener("click", toggleMuted)
-      audio.removeEventListener("ended", playAudio)
-    }
+    audio.addEventListener("ended", playAudio)
+    return () => audio.removeEventListener("ended", playAudio)
   }, [audio, firstInteraction])
 
   return (
-    <MusicContainer>
+    <MusicContainer dum={dum} paused={audio.paused} volume={audio.volume}>
+      {console.log(audio.volume)}
       <div onClick={fadeAudio} className="play">
         <span className="equalizer">
           <span className="equalizerBar equalizer1"></span>
