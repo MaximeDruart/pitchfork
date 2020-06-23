@@ -132,8 +132,8 @@ const ReviewerContainer = styled.div`
     align-items: center;
     width: 100%;
     color: white;
-    margin-top: 20px;
     padding: 0 40px;
+    padding-top: 20px;
     .see-all-reviewers {
       width: 240px;
       height: 60px;

@@ -15,7 +15,6 @@ const StyledPopup = styled.div`
     display: flex;
     justify-content: space-between;
     flex-direction: row;
-    width: 30vw;
     min-height: 20vh;
     .album-cover {
       background: blue;

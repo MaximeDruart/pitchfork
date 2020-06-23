@@ -32,7 +32,7 @@ const initialState = {
   filteredGenres: allGenres,
   filteredScores: scores,
   filteredSearch: "",
-  sampleSize: 3700,
+  sampleSize: 100,
 }
 
 const apiReducer = (state = initialState, action) => {
