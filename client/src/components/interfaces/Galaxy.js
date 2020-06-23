@@ -7,9 +7,6 @@ import GalaxySearchBar from "./interfaceChildren/GalaxySearchBar"
 import gsap from "gsap"
 import { useRef } from "react"
 
-// Import icons
-import pitchforkLogo from "../../assets/icons/logo-pitchfork.svg"
-
 const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 const Galaxy = () => {
@@ -116,11 +113,6 @@ const Galaxy = () => {
 
   return (
     <StyledGalaxy>
-      <StyledPitchforkLogo>
-        <div className="pitchfork-logo">
-          <img src={pitchforkLogo} alt="Pitchfork logo"></img>
-        </div>
-      </StyledPitchforkLogo>
       <GalaxySearchBar />
       <div className="scores">
         <div onClick={toggleAllScores} className="scores-title filter-title">
@@ -200,17 +192,6 @@ const StyledGenreItem = styled.div`
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
-`
-
-const StyledPitchforkLogo = styled.div`
-  .pitchfork-logo {
-    img{
-      width: 20px;
-      height: 20px;
-      color: white;
-      z-index: 10000;
-    }
-  }
 `
 
 export default Galaxy

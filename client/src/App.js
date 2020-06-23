@@ -12,8 +12,26 @@ import Credits from "./components/interfaces/Credits"
 import Music from "./components/Music"
 import styled from "styled-components"
 
+// Import icons
+import pitchforkLogo from "./assets/icons/logo-pitchfork.svg"
+
 const Logo = styled.div`
   position: fixed;
+  right: 5%;
+  top: 7%;
+  .pitchfork-logo {
+    img{
+      width: 40px;
+      height: 40px;
+      color: white;
+      opacity: 0.5;
+      transition: 0.8s;
+      z-index: 10000;
+    }
+    img:hover{
+      opacity: 1;
+    }
+  }
 `
 
 const App = () => {
@@ -35,7 +53,11 @@ const App = () => {
       <GalaxyPopup />
       {pathname !== "/" && <Nav />}
       <Route exact path={["/", "/galaxy", "/credits"]}>
-        <Logo>Pitchfork</Logo>
+        <Logo>
+          <div className="pitchfork-logo">
+            <a href="https://pitchfork.com/" target="_blank"><img src={pitchforkLogo} alt="Pitchfork logo"></img></a>
+          </div>
+        </Logo>
       </Route>
       <THREECanvas />
       <Music />

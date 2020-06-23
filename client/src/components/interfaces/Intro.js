@@ -56,6 +56,7 @@ const IntroContainer = styled.div`
   }
   .intro-button {
   }
+
 `
 
 const Intro = () => {
