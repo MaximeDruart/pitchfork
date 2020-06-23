@@ -56,8 +56,14 @@ const IntroContainer = styled.div`
   }
   .intro-button {
   }
+
 `
 
+const Logo = styled.div`
+  .pitchfork-logo {
+    display: none;
+  }
+`
 const Intro = () => {
   return (
     <IntroContainer>

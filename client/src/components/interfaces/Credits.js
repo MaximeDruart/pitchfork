@@ -22,20 +22,6 @@ const CreditsContainer = styled.div`
       width: 25px;
       height: 25px;
     }
-    .to-pitchfork a{
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      text-decoration: none;
-      cursor: pointer;
-      font-family: "Oswald-Light";
-      color: white;
-      img{
-        width: 30px;
-        height: 30px;
-        margin-right: 12px;
-      }
-    }
   }
   .container{
     width: 1200px;
@@ -102,12 +88,6 @@ const Credits = () => {
     <CreditsContainer>
       <div className="header">
         <a href="#"><img className="go-back" src={nextLeftButton} alt="return"></img></a>
-        <div className="to-pitchfork">
-          <a href="https://pitchfork.com/">
-            <img src={pitchforkLogo} alt="pitchfork-logo"></img>
-            Link to Pitchfork
-          </a>
-        </div>
       </div>
       <div className="container">
         <div className="align-column">
