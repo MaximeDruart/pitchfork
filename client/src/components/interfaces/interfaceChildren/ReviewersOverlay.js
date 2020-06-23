@@ -10,7 +10,7 @@ const StyledOverlay = styled.div`
   display: ${(props) => (props.show ? "block" : "none")};
   width: 100vw;
   height: 100vh;
-  background-color: #0C0A17;
+  background-color: #0c0a17;
   overflow: scroll;
   .header {
     margin-bottom: 15px;
@@ -49,7 +49,7 @@ const StyledOverlay = styled.div`
             border-bottom: 1px solid white;
           }
         }
-        img{
+        img {
           width: 13px;
           height: 13px;
           margin-left: 16px;
@@ -123,21 +123,21 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
       <div className="header">
         <div className="container">
           <div className="goBack">
-            <img onClick={() => setShow(false)} src={nextLeftButton}></img>
+            <img alt="" onClick={() => setShow(false)} src={nextLeftButton}></img>
           </div>
           <div className="filters">
             <div className="left">
               filter names
-              <img className="filter-button" src={filterButton}></img>
+              <img alt="" className="filter-button" src={filterButton}></img>
             </div>
             <div className="right">
               <div className="genres-filter">
                 select genres
-                <img className="filter-button" src={filterButton}></img>
+                <img alt="" className="filter-button" src={filterButton}></img>
               </div>
               <div>
                 number of reviews
-                <img className="filter-button" src={filterButton}></img>
+                <img alt="" className="filter-button" src={filterButton}></img>
               </div>
             </div>
           </div>

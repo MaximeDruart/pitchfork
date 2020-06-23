@@ -11,7 +11,7 @@ import { dateToYearPercent, degToRad } from "./utils"
 import { setHoveredAlbum, setAlbumPosition } from "../../redux/actions/interfaceActions"
 import Stats from "stats.js"
 import { st } from "../../assets/StyledComponents"
-import textTextures from "../../assets/textTextures"
+import { textTextures, scoreTextures } from "../../assets/textTextures"
 
 const stats = new Stats()
 stats.showPanel(0)
@@ -60,6 +60,7 @@ const th = {
     color: 0x99000000,
   },
   textures: [],
+  scoreTextures: [],
 }
 th.cameraHelper = new THREE.CameraHelper(th.camera)
 th.sphere.mesh = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
@@ -78,17 +79,8 @@ const THREECanvas = () => {
 
   const [spawnDone, setSpawnDone] = useState(false)
 
-  // const { loading, filteredReviews } = useSelector(
-  //   (state) => ({
-  //     loading: state.api.loading,
-  //     filteredReviews: state.api.filteredReviews,
-  //   }),
-  //   shallowEqual
-  // )
-  const zoom = useSelector((state) => state.interface.zoom)
   const { pathname } = useLocation()
   const dispatch = useDispatch()
-  const [lastUpdate, setLastUpdate] = useState(Date.now())
 
   const toggleOrbitControls = (isTrue) => {
     if (isTrue) {
@@ -108,7 +100,6 @@ const THREECanvas = () => {
           if (pathname === "/galaxy" && th.scene.fog) {
             // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
             th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
-            console.log(th.scene.fog.far)
           }
         })
       }
@@ -164,7 +155,15 @@ const THREECanvas = () => {
     const textureLoader = new THREE.TextureLoader()
     textTextures.forEach((textTexture) => {
       textureLoader.load(textTexture, (_texture) => {
+        _texture.minFilter = THREE.LinearFilter
         th.textures.push(_texture)
+      })
+    })
+
+    scoreTextures.forEach((_scoreTexture) => {
+      textureLoader.load(_scoreTexture, (_scoreTexture) => {
+        _scoreTexture.minFilter = THREE.LinearFilter
+        th.scoreTextures.push(_scoreTexture)
       })
     })
 
@@ -205,7 +204,6 @@ const THREECanvas = () => {
     th.renderer.setClearAlpha(0)
     $canvas.current.appendChild(th.renderer.domElement)
 
-    let i = 0
     const animate = (t) => {
       stats.begin()
 
@@ -280,6 +278,7 @@ const THREECanvas = () => {
       window.removeEventListener("mousemove", onMouseMoveHandler)
       window.removeEventListener("resize", resizeHandler)
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // galaxy scene set up
@@ -397,26 +396,8 @@ const THREECanvas = () => {
     }
   }, [filteredReviews])
 
-  // camera movements in galaxy
-  useEffect(() => {
-    // adjust camera zoom
-
-    // get the range ( percent of width), mutliply it by width, then divide it by 2 coz we need a triangle for trigo
-    let testY = ((zoom[1] - zoom[0]) * th.sceneSize.width) / 100
-    testY = testY / 2
-
-    const tanRad = Math.tan(degToRad(fov / 2))
-    const tanDeg = tanRad
-    // const cameraZ = (rangeMappedToRealWorld[1] - rangeMappedToRealWorld[0]) / tanDeg
-    const cameraZ = testY / tanDeg
-    // console.log("setting camera z via zoom")
-    // th.camera.position.z = cameraZ
-    // th.camera.updateProjectionMatrix()
-  }, [zoom])
-
   // REVIEWERDETAIL scene setup
   useEffect(() => {
-    console.log(activeReviewer, reviews.length)
     if (pathname.includes("/reviewer/")) {
       th.scene.position.set(0, 0, 0)
       gsap.to(th.camera.position, {
@@ -438,13 +419,14 @@ const THREECanvas = () => {
         }
 
         const range = 5
-        const variationRo = 0.3
-        const variationPhi = 0.7
-
         // toggleRadialHelp(true)
 
         const lineGroup = new THREE.Group()
-        const lineMaterial = new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.4 })
+        const lineMaterial = new THREE.LineBasicMaterial({
+          color: "white",
+          transparent: true,
+          opacity: 0.4,
+        })
         const points = []
         points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2 + 0.05, 0))
         points.push(new THREE.Vector3().setFromSphericalCoords(range, Math.PI / 2 - 0.05, 0))
@@ -465,16 +447,28 @@ const THREECanvas = () => {
         const centerLineGeometry = new THREE.BufferGeometry().setFromPoints(centerPoints)
         const centerLine = new THREE.Line(
           centerLineGeometry,
-          new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.1 })
+          new THREE.LineBasicMaterial({
+            color: "white",
+            transparent: true,
+            opacity: 0.1,
+          })
         )
 
         const middleAxis = new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 5, 0), new THREE.Vector3(0, -5, 0)]),
-          new THREE.LineBasicMaterial({ color: "white", transparent: true, opacity: 0.1 })
+          new THREE.LineBasicMaterial({
+            color: "white",
+            transparent: true,
+            opacity: 0.1,
+          })
         )
 
-        const reviewsForReviewer = reviews.filter((_review) => _review.author === activeReviewer.name)
+        // decoration
+        lineGroup.add(lineAround)
+        lineGroup.add(centerLine)
+        lineGroup.add(middleAxis)
 
+        const reviewsForReviewer = reviews.filter((_review) => _review.author === activeReviewer.name)
         th.sphereGroup = new THREE.Group()
         th.sphereGroup.name = "sphereGroup"
         th.sphereGroup.rotation.z = degToRad(13)
@@ -482,16 +476,16 @@ const THREECanvas = () => {
         const innerSphereGroup = new THREE.Group()
         innerSphereGroup.name = "innerSphereGroup"
         innerSphereGroup.visible = false
-
+        const sphereRviewerGeometry = new THREE.SphereGeometry(0.15, 12, 12)
         reviewsForReviewer.forEach((review) => {
-          const roComputed = gsap.utils.mapRange(0, 10, 0, range, review.score) // radius
-          // const roComputed = 5 // radius
+          // const roComputed = gsap.utils.mapRange(0, 10, 0, range, review.score) // radius
+          const roComputed = gsap.utils.random(0.5 * range, 0.95 * range) // radius
           const thetaComputed = dateToYearPercent(review.date, "rad") // x-y angle
           const phiComputed = Math.PI / 2 // z angle
           // const phiComputed = gsap.utils.random(Math.PI / 2 - variationPhi, Math.PI / 2 + variationPhi) // z angle
 
           const sphere = new THREE.Mesh(
-            th.sphere.geometry,
+            sphereRviewerGeometry,
             new THREE.MeshPhongMaterial({
               color: st.genresColors[review.genre],
               transparent: true,
@@ -499,14 +493,18 @@ const THREECanvas = () => {
             })
           )
           sphere.position.setFromSphericalCoords(roComputed, phiComputed, thetaComputed)
-          sphere.position.y += gsap.utils.random(-1, 1)
-          sphere.userData = { ...review, spherical: [roComputed, phiComputed, thetaComputed] }
+          sphere.position.y += gsap.utils.mapRange(0, 10, -3, 3, review.score)
+          sphere.userData = {
+            ...review,
+            spherical: [roComputed, phiComputed, thetaComputed],
+          }
           sphere.name = "sphere"
           innerSphereGroup.add(sphere)
         })
 
         const planeGeometry = new THREE.PlaneGeometry(0.54, 0.3)
-        const yearStart = new THREE.Mesh(
+        const planeScoreGeometry = new THREE.PlaneGeometry(0.76, 0.3)
+        const yearStartLabel = new THREE.Mesh(
           planeGeometry,
           new THREE.MeshBasicMaterial({
             map: th.textures[0],
@@ -515,7 +513,7 @@ const THREECanvas = () => {
             side: THREE.DoubleSide,
           })
         )
-        const yearEnd = new THREE.Mesh(
+        const yearEndLabel = new THREE.Mesh(
           planeGeometry,
           new THREE.MeshBasicMaterial({
             map: th.textures[th.textures.length - 1],
@@ -524,21 +522,69 @@ const THREECanvas = () => {
             side: THREE.DoubleSide,
           })
         )
-        yearStart.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(4))
-        yearStart.lookAt(0, 0, 0)
-        yearStart.rotation.y += Math.PI
-        yearStart.position.y += 0.2
-        yearEnd.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(339))
-        yearEnd.lookAt(0, 0, 0)
-        yearEnd.rotation.y += Math.PI
-        yearEnd.position.y += 0.2
+        const scoreLabel1 = new THREE.Mesh(
+          planeScoreGeometry,
+          new THREE.MeshBasicMaterial({
+            map: th.scoreTextures[0],
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide,
+          })
+        )
 
-        // decoration
-        lineGroup.add(lineAround)
-        lineGroup.add(centerLine)
-        lineGroup.add(middleAxis)
+        const scoreLabel2 = new THREE.Mesh(
+          planeScoreGeometry,
+          new THREE.MeshBasicMaterial({
+            map: th.scoreTextures[1],
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide,
+          })
+        )
 
+        const scoreLabel3 = new THREE.Mesh(
+          planeScoreGeometry,
+          new THREE.MeshBasicMaterial({
+            map: th.scoreTextures[1],
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide,
+          })
+        )
+        scoreLabel2.position.y = 3
+        scoreLabel3.position.y = -3
+        // scoreLabel.rotation.x = degToRad(-90)
+
+        yearStartLabel.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(4))
+        yearStartLabel.lookAt(0, 0, 0)
+        yearStartLabel.rotation.y += Math.PI
+        yearStartLabel.position.y += 0.2
+
+        yearEndLabel.position.setFromSphericalCoords(5, Math.PI / 2, degToRad(339))
+        yearEndLabel.lookAt(0, 0, 0)
+        yearEndLabel.rotation.y += Math.PI
+        yearEndLabel.position.y += 0.2
+
+        th.sphereGroup.add(scoreLabel1)
+        th.sphereGroup.add(scoreLabel2)
+        th.sphereGroup.add(scoreLabel3)
+        th.sphereGroup.add(yearStartLabel)
+        th.sphereGroup.add(yearEndLabel)
+
+        th.sphereGroup.add(innerSphereGroup)
+        th.sphereGroup.add(lineGroup)
+        th.scene.add(th.sphereGroup)
+
+        const labelsMaterials = [
+          scoreLabel1.material,
+          scoreLabel2.material,
+          scoreLabel3.material,
+          yearStartLabel.material,
+          yearEndLabel.material,
+        ]
         const innerSphereMaterials = innerSphereGroup.children.map((child) => child.material)
+
+        // eslint-disable-next-line no-unused-vars
         const spawnTl = gsap
           .timeline({
             defaults: {
@@ -555,20 +601,7 @@ const THREECanvas = () => {
             stagger: { amount: 1.2 },
             duration: 0.5,
           })
-          .from([yearStart.material, yearEnd.material], { opacity: 0 })
-
-        // innerSphereGroup.children.forEach((sphere) => {
-        //   const [ro, phi, theta] = sphere.userData.spherical
-        //   sphere.position.set(new THREE.Vector3().setFromSphericalCoords(0 + t / 1000, phi + t / 1000, theta))
-        // })
-
-        th.sphereGroup.add(innerSphereGroup)
-        th.sphereGroup.add(yearStart)
-        th.sphereGroup.add(yearEnd)
-        th.sphereGroup.add(lineGroup)
-
-        th.scene.add(th.sphereGroup)
-        console.log(th.sphereGroup)
+          .from(labelsMaterials, { opacity: 0 })
       }
     }
   }, [activeReviewer, reviews.length])

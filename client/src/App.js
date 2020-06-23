@@ -9,9 +9,12 @@ import ReviewerDetail from "./components/interfaces/ReviewerDetail"
 import Nav from "./components/Nav"
 import GalaxyPopup from "./components/interfaces/interfaceChildren/GalaxyPopup"
 import Credits from "./components/interfaces/Credits"
+import Music from "./components/Music"
 
 const App = () => {
   const { pathname } = useLocation()
+
+  // const wat
 
   console.log("running app")
   return (
@@ -27,6 +30,7 @@ const App = () => {
       <GalaxyPopup />
       {pathname !== "/" && <Nav />}
       <THREECanvas />
+      <Music />
     </div>
   )
 }

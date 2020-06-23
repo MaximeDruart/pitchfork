@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import styled from "styled-components"
 import { useDispatch } from "react-redux"
 import { setSearch } from "../../../redux/actions/apiActions"
@@ -64,7 +64,7 @@ const GalaxySearchBar = () => {
   return (
     <StyledSearchBar>
       <div className="search-bar">
-        <img className="search-button" src={search}></img>
+        <img alt="" className="search-button" src={search}></img>
         <input placeholder="search for an artist" onChange={inputHandler} value={input} type="text" />
       </div>
     </StyledSearchBar>

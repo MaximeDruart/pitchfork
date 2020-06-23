@@ -4,25 +4,10 @@ import { getReviews, setGenres, setScores } from "../../redux/actions/apiActions
 import styled from "styled-components"
 import { st } from "../../assets/StyledComponents"
 import GalaxySearchBar from "./interfaceChildren/GalaxySearchBar"
-import Slider from "@material-ui/core/Slider"
 import gsap from "gsap"
-import rangeSvg from "../../assets/icons/range.svg"
-import dotsSvg from "../../assets/icons/dots.svg"
-import { setZoomLevel } from "../../redux/actions/interfaceActions"
 import { useRef } from "react"
 
 const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-const getPeriodRange = ([a, b]) => [
-  Math.floor(gsap.utils.mapRange(0, 100, 1999, 2019, a)),
-  Math.floor(gsap.utils.mapRange(0, 100, 1999, 2019, b)),
-]
-
-const getClipPath = (zoom) => {
-  const leftStr = zoom[0] + "%"
-  const rightStr = zoom[1] + "%"
-  return `polygon(${leftStr} 0%, ${rightStr} 0%, ${rightStr} 100%, ${leftStr} 100%)`
-}
 
 const Galaxy = () => {
   const dispatch = useDispatch()
@@ -34,11 +19,13 @@ const Galaxy = () => {
   const reviews = useSelector((state) => state.api.reviews, shallowEqual)
   const { filteredGenres, filteredScores, allGenres, sampleSize } = useSelector((state) => state.api, shallowEqual)
   // const { filteredGenres, filteredScores, allGenres } = useSelector((state) => state.api, shallowEqual)
-  const zoom = useSelector((state) => state.interface.zoom)
 
   useEffect(() => {
-    if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"], sampleSize))
-  }, [reviews, dispatch])
+    if (reviews.length === 0) {
+      console.log("fetching reviews")
+      dispatch(getReviews({}, ["review", "role", "bnm", "id"], sampleSize))
+    }
+  }, [reviews, dispatch, sampleSize])
 
   const updateScores = (scoreToUpdate) => {
     let newScores = []
@@ -65,14 +52,6 @@ const Galaxy = () => {
       newGenres.push(genreToUpdate)
     }
     dispatch(setGenres(newGenres))
-  }
-
-  const updatePeriod = (event, newValue) => {
-    let difference = 20
-    let clampedValue = newValue
-    // need to restrain the value so the range doesn't get too small
-    // if (newValue[1] - difference - newValue[0] < 0) clampedValue = [newValue[0], newValue[1]]
-    dispatch(setZoomLevel(clampedValue))
   }
 
   const mappedScore = () =>
@@ -103,6 +82,7 @@ const Galaxy = () => {
     ))
 
   useLayoutEffect(() => {
+    // eslint-disable-next-line no-unused-vars
     const tl = gsap
       .timeline({ onComplete: () => setSpawnAnimDone(true) })
       .addLabel("sync")
@@ -132,7 +112,7 @@ const Galaxy = () => {
   }, [])
 
   return (
-    <StyledGalaxy polygon={getClipPath(zoom)}>
+    <StyledGalaxy>
       <GalaxySearchBar />
       <div className="scores">
         <div onClick={toggleAllScores} className="scores-title filter-title">
@@ -148,19 +128,6 @@ const Galaxy = () => {
         </div>
         <div ref={$genreContainer} className="filter-selector">
           {mappedGenres()}
-        </div>
-      </div>
-      <div ref={$period} className="period">
-        <div className="year period-start">
-          <span>{getPeriodRange(zoom)[0]}</span>
-        </div>
-        <div className="svgs">
-          <img className="front" src={rangeSvg} alt="" />
-          <img className="low-opac-behind" src={rangeSvg} alt="" />
-        </div>
-        <Slider className="period-slider" value={zoom} onChange={updatePeriod} />
-        <div className="year period-end">
-          <span>{getPeriodRange(zoom)[1]}</span>
         </div>
       </div>
     </StyledGalaxy>
@@ -183,84 +150,6 @@ const StyledGalaxy = styled.div`
   .genres {
     left: 11vw;
     align-items: flex-start;
-  }
-
-  .period {
-    position: absolute;
-    bottom: 10vh;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 77vw;
-    opacity: 0;
-    * {
-      color: white;
-    }
-    .year {
-      font-size: ${st.fzLarge};
-      display: flex;
-      justify-content: center;
-      align-content: center;
-    }
-
-    .svgs img {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 70%;
-      &.front {
-        clip-path: ${(props) => props.polygon};
-      }
-
-      &.low-opac-behind {
-        opacity: 0.2;
-      }
-    }
-
-    .period-slider {
-      position: absolute;
-      width: 70%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-
-      .MuiSlider-rail {
-        display: none;
-      }
-      .MuiSlider-track {
-        display: none;
-      }
-
-      .MuiSlider-thumb {
-        width: 3px;
-        height: 60px;
-        border-radius: 1px;
-        top: 50%;
-        transform: translateY(-50%);
-
-        &:before {
-          content: "";
-          position: absolute;
-          right: 10px;
-          height: 80%;
-          width: 25px;
-          background-image: url(${dotsSvg});
-          background-repeat: no-repeat;
-        }
-
-        &:last-child:before {
-          left: 10px;
-          right: none;
-        }
-
-        &:after {
-          content: none;
-        }
-      }
-    }
   }
 
   .filter-title {

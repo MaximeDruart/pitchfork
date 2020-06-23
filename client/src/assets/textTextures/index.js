@@ -19,10 +19,10 @@ import img18 from "./light/2016.png"
 import img19 from "./light/2017.png"
 import img20 from "./light/2018.png"
 import img21 from "./light/2019.png"
-import score5 from "./light/2019.png"
-import score10 from "./light/2019.png"
+import score5 from "./light/SCORE-5.png"
+import score10 from "./light/SCORE-10.png"
 
-export default [
+export const textTextures = [
   img1,
   img2,
   img3,
@@ -44,6 +44,6 @@ export default [
   img19,
   img20,
   img21,
-  score5,
-  score10,
 ]
+
+export const scoreTextures = [score5, score10]

@@ -11,11 +11,7 @@ import ReviewersOverlay from "./interfaceChildren/ReviewersOverlay"
 // Import icons
 import nextLeftButton from "../../assets/icons/next-left.svg"
 import nextRightButton from "../../assets/icons/next-right.svg"
-import { useLayoutEffect } from "react"
-import gsap from "gsap/gsap-core"
-import { useRef } from "react"
 
-let spawnTl
 const ReviewerDetail = () => {
   const [showOverlay, setShowOverlay] = useState(false)
   const dispatch = useDispatch()
@@ -33,7 +29,7 @@ const ReviewerDetail = () => {
 
   useEffect(() => {
     if (reviews.length === 0) dispatch(getReviews({}, ["review", "role", "bnm", "id"], sampleSize))
-  }, [dispatch, reviews.length])
+  }, [dispatch, reviews.length, sampleSize])
 
   // GETTING URL REVIEWER INFO
   useEffect(() => {
@@ -55,7 +51,7 @@ const ReviewerDetail = () => {
         dispatch(setActiveReviewer(reviewerTemp))
       }
     }
-  }, [loading, history, reviewers, slug])
+  }, [loading, history, reviewers, slug, sampleSize, dispatch])
 
   const preferedWords = useMemo(
     () =>
