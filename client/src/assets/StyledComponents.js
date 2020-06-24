@@ -6,7 +6,7 @@ export const st = {
   background: "#212029",
   fzSmall: "1rem",
   fzMedium: "1.2rem",
-  fzLarge: "2.3rem",
+  fzLarge: "1.6rem",
   txtGrey: "#868686",
   genresColors: {
     "Folk/Country": "#BD94F0",
@@ -79,7 +79,7 @@ export const NavButton = styled(Link)`
     width: 0px;
     height: 100%;
     z-index: -1;
-    content: '';
+    content: "";
     background: white;
     color: black;
     transition: all 0.5s ease-in-out;

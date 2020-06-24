@@ -10,7 +10,7 @@ const StyledOverlay = styled.div`
   display: ${(props) => (props.show ? "block" : "none")};
   width: 100vw;
   height: 100vh;
-  background-color: #0c0a17;
+  background-color: black;
   overflow-y: scroll;
   overflow-x: hidden;
   z-index: 2000;

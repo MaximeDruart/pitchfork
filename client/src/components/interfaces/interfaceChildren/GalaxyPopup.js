@@ -10,7 +10,7 @@ const StyledPopup = styled.div`
   color: white;
   z-index: 1000;
   position: fixed;
-  top: 6vh;
+  top: 14vh;
   right: 6vw;
   /* transform: ${(props) => (props.pos ? `translate(${props.pos[0]}px, ${props.pos[1]}px)` : "none")}; */
   .popup-container {
@@ -19,7 +19,7 @@ const StyledPopup = styled.div`
     flex-direction: row;
     min-height: 20vh;
     .album-cover {
-      background: blue;
+      background: rgba(64, 66, 100, 0.6);
       width: 160px;
       border-radius: 10px 0px 0px 10px;
       object-fit : cover;
@@ -67,8 +67,8 @@ const GalaxyPopup = () => {
           <div className="album-artist">{hoveredAlbum?.artist}</div>
           <div className="reviewer">
             Reviewed by
-            <span className="author-review">{hoveredAlbum?.author} </span>
-            on {hoveredAlbum?.date?.split(" ")[2]}
+            <span className="author-review"> {hoveredAlbum?.author} </span>
+            in {hoveredAlbum?.date?.split(" ")[2]}
           </div>
           <div className="score">{hoveredAlbum?.score}/10</div>
           <a

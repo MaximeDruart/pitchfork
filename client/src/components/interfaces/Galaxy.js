@@ -114,7 +114,7 @@ const Galaxy = () => {
   return (
     <StyledGalaxy>
       <GalaxySearchBar />
-      <HelpCaption>Click and drag to discover !</HelpCaption>
+      <HelpCaption>Click and drag to discover</HelpCaption>
       <div className="scores">
         <div onClick={toggleAllScores} className="scores-title filter-title">
           ratings

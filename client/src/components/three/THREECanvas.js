@@ -117,6 +117,7 @@ const THREECanvas = () => {
     th.controls.dampingFactor = 0.05
     th.controls.addEventListener("change", () => {
       if (pathname === "/galaxy" && th.scene.fog) {
+        console.log(th.scene.fog.far, th.camera.position.z)
         // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
         th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
         // if (!th.controls.enableDamping) {

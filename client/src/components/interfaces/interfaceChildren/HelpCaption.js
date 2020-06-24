@@ -2,6 +2,7 @@ import React from "react"
 import styled, { keyframes, css } from "styled-components"
 import { useSelector } from "react-redux"
 import mouseSvg from "../../../assets/icons/mouse.svg"
+import { st } from "../../../assets/StyledComponents"
 
 const shinekf = keyframes`
   from {opacity : 0.42};
@@ -24,6 +25,7 @@ const HelpContainer = styled.div`
   opacity: ${(p) => (p.int ? 0 : !p.loaded ? 0 : 0.6)};
   transition: opacity 0.7s 0.4s ease-in-out;
   pointer-events: none;
+  font-size: ${st.fzLarge};
 
   &:after {
     content: "";
@@ -31,8 +33,8 @@ const HelpContainer = styled.div`
     right: -34px;
     top: 50%;
     transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     background: no-repeat center url(${mouseSvg});
     animation: ${shine};
   }
