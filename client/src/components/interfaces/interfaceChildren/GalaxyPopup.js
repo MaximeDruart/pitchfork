@@ -80,7 +80,12 @@ const GalaxyPopup = () => {
             Read on pitchfork
           </a>
           <div>
-            <Link to={`/reviewer/${slugify(hoveredAlbum ? hoveredAlbum.author : "").toLowerCase()}`}>See reviewer</Link>
+            <Link
+              className="pitchfork-link"
+              to={`/reviewer/${slugify(hoveredAlbum ? hoveredAlbum.author : "").toLowerCase()}`}
+            >
+              See reviewer
+            </Link>
           </div>
         </div>
       </div>

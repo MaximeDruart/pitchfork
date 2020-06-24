@@ -103,9 +103,12 @@ const THREECanvas = () => {
     } else {
       th.controls.reset()
     }
+    th.controls.maxDistance = 30
+
     th.controls.enableDamping = true
     th.controls.enableRotate = false
     th.controls.enableZoom = false
+    th.controls.enableKeys = false
 
     th.controls.mouseButtons.LEFT = THREE.MOUSE.PAN
     th.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
@@ -116,6 +119,11 @@ const THREECanvas = () => {
       if (pathname === "/galaxy" && th.scene.fog) {
         // adjusting fog with distance. The goal is having a clear view for afar but be foggy upfront so that the data appears "readable"
         th.scene.fog.far = Math.max(th.camera.position.z * 1.8, th.fog.far)
+        // if (!th.controls.enableDamping) {
+        //   th.controls.enableDamping = true
+        //   th.controls.panSpeed = 2
+        // }
+        // if (th.camera.position.z < -40 || th.camera.position.z > 100) th.controls.enableDamping = false
       }
     })
   }
@@ -127,22 +135,14 @@ const THREECanvas = () => {
       th.controls.mouseButtons.RIGHT = null
       th.controls.enableRotate = true
       th.controls.enableZoom = false
+      th.controls.enableKeys = false
     }
   }
 
   // cleaning the scene when the scene is loaded. (only useful on page transitions)
   const clearSceneOfSphereGroup = () => {
-    if (th.scene?.children) {
-      th.scene.children.forEach((child) => {
-        if (
-          child.name === "sphereGroup" ||
-          child.name === "centerLine" ||
-          child.name === "yearLines" ||
-          child.name === "sphereIntros"
-        )
-          th.scene.remove(child)
-      })
-    }
+    // only keeping lights
+    th.scene.children = th.scene.children.filter((child) => child.name === "light")
   }
 
   const getLinesGroupGalaxy = () => {
@@ -225,9 +225,10 @@ const THREECanvas = () => {
 
     const hemiLight = new THREE.HemisphereLight("red", "blue", 0.38)
     // const hemiLight = new THREE.HemisphereLight("red", "blue", 0.68)
-    // hemiLight.
+    hemiLight.name = "light"
     th.scene.add(hemiLight)
     const ambientLight = new THREE.AmbientLight("white", 0.59)
+    ambientLight.name = "light"
     th.scene.add(ambientLight)
 
     /**
@@ -478,6 +479,7 @@ const THREECanvas = () => {
       })
       if (reviews.length && activeReviewer) {
         th.scene.fog = null
+
         clearSceneOfSphereGroup()
 
         const range = 5

@@ -41,11 +41,15 @@ const StyledOverlay = styled.div`
         text-transform: uppercase;
         font-family: "Oswald-ExtraLight";
         letter-spacing: 4px;
+        .filter-group {
+          cursor: pointer;
+        }
         .right {
           display: flex;
           justify-content: space-between;
           align-self: flex-end;
           font-family: "Oswald-ExtraLight";
+          width: 460px;
           .genres-filter {
             padding-bottom: 5px;
             border-bottom: 1px solid white;
@@ -192,25 +196,16 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
           </div>
           <div className="filters">
             <div className="left">
-              <span>names</span>
-              <img
-                onClick={() => dispatch({ type: "SORT_NAME" })}
-                alt=""
-                className="filter-button"
-                src={filterButton}
-              ></img>
+              <div onClick={() => dispatch({ type: "SORT_NAME" })} className="names filter-group">
+                <span>names</span>
+                <img alt="" className="filter-button" src={filterButton}></img>
+              </div>
             </div>
             <div className="right">
-              <div>
+              <div className="genres">prefered genre</div>
+              <div onClick={() => dispatch({ type: "SORT_REVIEWCOUNT" })} className="reviews filter-group">
                 <span>reviews</span>
-                <img
-                  onClick={() => {
-                    dispatch({ type: "SORT_REVIEWCOUNT" })
-                  }}
-                  alt=""
-                  className="filter-button"
-                  src={filterButton}
-                ></img>
+                <img alt="" className="filter-button" src={filterButton}></img>
               </div>
             </div>
           </div>

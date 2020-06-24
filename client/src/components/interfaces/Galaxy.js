@@ -1,12 +1,12 @@
 import React, { useEffect, useLayoutEffect, useState } from "react"
 import { useDispatch, useSelector, shallowEqual } from "react-redux"
 import { getReviews, setGenres, setScores } from "../../redux/actions/apiActions"
-import styled, { keyframes, css } from "styled-components"
+import styled from "styled-components"
 import { st } from "../../assets/StyledComponents"
 import GalaxySearchBar from "./interfaceChildren/GalaxySearchBar"
 import gsap from "gsap"
 import { useRef } from "react"
-import mouseSvg from "../../assets/icons/mouse.svg"
+import HelpCaption from "./interfaceChildren/HelpCaption"
 
 const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -14,12 +14,10 @@ const Galaxy = () => {
   const dispatch = useDispatch()
   const $genreContainer = useRef(null)
   const $scoreContainer = useRef(null)
-  const $period = useRef(null)
   const [spawnAnimDone, setSpawnAnimDone] = useState(false)
 
   const reviews = useSelector((state) => state.api.reviews, shallowEqual)
   const { filteredGenres, filteredScores, allGenres, sampleSize } = useSelector((state) => state.api, shallowEqual)
-  const hasInteractedWithCanvas = useSelector((state) => state.interface.hasInteractedWithCanvas)
 
   useEffect(() => {
     if (reviews.length === 0) {
@@ -84,7 +82,7 @@ const Galaxy = () => {
   useLayoutEffect(() => {
     // eslint-disable-next-line no-unused-vars
     const tl = gsap
-      .timeline({ onComplete: () => setSpawnAnimDone(true) })
+      .timeline({ onComplete: () => setSpawnAnimDone(true), paused: true })
       .addLabel("sync")
       .from(
         $genreContainer.current.childNodes,
@@ -108,13 +106,15 @@ const Galaxy = () => {
         },
         "sync"
       )
-      .to($period.current, { ease: "Power2.easeIn", opacity: 1, duration: 0.6 }, "sync")
+    if (($genreContainer.current.childNodes, $scoreContainer.current.childNodes)) {
+      tl.play()
+    }
   }, [])
 
   return (
-    <StyledGalaxy loaded={!!reviews.length} int={hasInteractedWithCanvas}>
+    <StyledGalaxy>
       <GalaxySearchBar />
-      <div className="help">click and drag to discover</div>
+      <HelpCaption>Click and drag to discover !</HelpCaption>
       <div className="scores">
         <div onClick={toggleAllScores} className="scores-title filter-title">
           ratings
@@ -135,41 +135,7 @@ const Galaxy = () => {
   )
 }
 
-const shinekf = keyframes`
-  from {opacity : 0.42};
-  to {opacity : 0.64};
-`
-
-const shine = () =>
-  css`
-    ${shinekf} 1.4s ease alternate infinite;
-  `
-
 const StyledGalaxy = styled.div`
-  .help {
-    position: absolute;
-    font-family: "Oswald-Light";
-    bottom: 10vh;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    text-transform: uppercase;
-    opacity: ${(p) => (p.int ? 0 : !p.loaded ? 0 : 0.6)};
-    transition: opacity 0.7s 0.4s ease-in-out;
-    pointer-events: none;
-
-    &:after {
-      content: "";
-      position: absolute;
-      right: -34px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
-      background: no-repeat center url(${mouseSvg});
-      animation: ${shine};
-    }
-  }
   .scores,
   .genres {
     position: absolute;
@@ -198,6 +164,11 @@ const StyledGalaxy = styled.div`
     text-transform: uppercase;
     font-size: ${st.fzSmall};
     letter-spacing: 2px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease-in-out;
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .filter-selector {
@@ -215,6 +186,9 @@ const StyledScoreItem = styled.div`
   text-align: left;
   cursor: pointer;
   margin-bottom: 20px;
+  &:hover {
+    color: white;
+  }
 `
 
 const StyledGenreItem = styled.div`
@@ -226,6 +200,9 @@ const StyledGenreItem = styled.div`
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
+  &:hover {
+    color: ${(props) => st.genresColors[props.genre]};
+  }
 `
 
 export default Galaxy

@@ -9,6 +9,9 @@ import github from "../../assets/icons/github.svg"
 const CreditsContainer = styled.div`
   font-family: "Oswald-Light";
   color: white;
+  background: black;
+  width: 100vw;
+  height: 100vh;
   .header {
     display: flex;
     justify-content: space-between;
