@@ -328,7 +328,7 @@ const THREECanvas = () => {
           })
         )
 
-        sphere.position.x = -22
+        sphere.position.x = -24
         const keyframes = []
         const noiseXOffset = gsap.utils.random(0, 1000, 1)
         for (let x = 0; x < 80; x++) {
@@ -377,6 +377,8 @@ const THREECanvas = () => {
       // animate lines
 
       if (!loading && reviews.length > 0) {
+        dispatch(setCanvasInteraction(false))
+
         th.infiniteRotationTl && clearInterval(th.infiniteRotationTl)
 
         clearSceneOfSphereGroup()
@@ -477,7 +479,10 @@ const THREECanvas = () => {
           if (th.camera.position.z !== 10) th.camera.position.z = 10
         },
       })
+
       if (reviews.length && activeReviewer) {
+        dispatch(setCanvasInteraction(false))
+
         th.scene.fog = null
 
         clearSceneOfSphereGroup()

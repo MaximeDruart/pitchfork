@@ -11,7 +11,7 @@ export default (state = initialState, { type, payload }) => {
     case "SET_ALBUM_POSITION":
       return { ...state, albumPosition: payload }
     case "SET_CANVAS_INTERACTION":
-      return { ...state, hasInteractedWithCanvas: true }
+      return { ...state, hasInteractedWithCanvas: payload }
 
     default:
       return state

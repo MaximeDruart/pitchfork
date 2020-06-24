@@ -73,10 +73,26 @@ const MusicContainer = styled.div`
 
 const Music = () => {
   const [audio] = useState(new Audio(waterMusic))
+
+  // dummy piece of state to trigger component rerender
   const [dum, setDum] = useState("test")
 
-  const fadeAudio = () =>
-    gsap.to(audio, { volume: audio.volume ? 0 : 0.3, duration: 1.3, onStart: () => setDum(audio.volume) })
+  const fadeAudio = () => {
+    if (audio.paused) {
+      audio.play()
+      setDum(audio.volume)
+      gsap.to(audio, { volume: 0.3, duration: 1.3 })
+    } else {
+      gsap.to(audio, {
+        volume: 0,
+        duration: 1.3,
+        onComplete: () => {
+          audio.pause()
+          setDum("huuuuuh")
+        },
+      })
+    }
+  }
 
   useEffect(() => {
     audio.volume = 0.3
@@ -95,7 +111,7 @@ const Music = () => {
   }, [audio])
 
   return (
-    <MusicContainer dum={dum} volume={audio.volume}>
+    <MusicContainer dum={dum} volume={audio.paused}>
       <div onClick={fadeAudio} className="play">
         <span className="equalizer">
           <span className="equalizerBar equalizer1"></span>

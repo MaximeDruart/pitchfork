@@ -11,6 +11,7 @@ import ReviewersOverlay from "./interfaceChildren/ReviewersOverlay"
 // Import icons
 import nextLeftButton from "../../assets/icons/next-left.svg"
 import nextRightButton from "../../assets/icons/next-right.svg"
+import HelpCaption from "./interfaceChildren/HelpCaption"
 
 const ReviewerDetail = () => {
   const [showOverlay, setShowOverlay] = useState(false)
@@ -74,6 +75,7 @@ const ReviewerDetail = () => {
       {!loading && reviewers.length > 0 && (
         <ReviewersOverlay setShow={setShowOverlay} show={showOverlay} reviewers={reviewers} />
       )}
+      <HelpCaption>Click and drag to rotate</HelpCaption>
       <div className="header">
         <div className="reviewer-name-container">
           <div className="previous">
