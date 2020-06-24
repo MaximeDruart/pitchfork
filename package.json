@@ -1,5 +1,8 @@
 {
   "name": "pitchfork-server",
+  "engines": {
+    "node": "14.3"
+  },
   "version": "1.0.0",
   "description": "alt tab server side",
   "main": "server.js",
