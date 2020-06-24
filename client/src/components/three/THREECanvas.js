@@ -13,6 +13,15 @@ import { st } from "../../assets/StyledComponents"
 import { textTextures, scoreTextures } from "../../assets/textTextures"
 import SimplexNoise from "simplex-noise"
 
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js"
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js"
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js"
+
+import { LuminosityShader } from "three/examples/jsm/shaders/LuminosityShader.js"
+import { SobelOperatorShader } from "three/examples/jsm/shaders/SobelOperatorShader.js"
+import { DotScreenShader } from "three/examples/jsm/shaders/DotScreenShader.js"
+import { RGBShiftShader } from "three/examples/jsm/shaders/RGBShiftShader.js"
+
 const stats = new Stats()
 stats.showPanel(0)
 document.body.appendChild(stats.dom)
@@ -240,6 +249,33 @@ const THREECanvas = () => {
     th.renderer.setClearAlpha(0)
     $canvas.current.appendChild(th.renderer.domElement)
 
+    const composer = new EffectComposer(th.renderer)
+    const renderPass = new RenderPass(th.scene, th.camera)
+    composer.addPass(renderPass)
+
+    // color to grayscale conversion
+
+    var effectGrayScale = new ShaderPass(LuminosityShader)
+    // composer.addPass(effectGrayScale)
+
+    // you might want to use a gaussian blur filter before
+    // the next pass to improve the result of the Sobel operator
+
+    // Sobel operator
+
+    const effectSobel = new ShaderPass(SobelOperatorShader)
+    effectSobel.uniforms["resolution"].value.x = window.innerWidth * window.devicePixelRatio
+    effectSobel.uniforms["resolution"].value.y = window.innerHeight * window.devicePixelRatio
+    composer.addPass(effectSobel)
+
+    var effect = new ShaderPass(DotScreenShader)
+    effect.uniforms["scale"].value = 4
+    composer.addPass(effect)
+
+    var effect = new ShaderPass(RGBShiftShader)
+    effect.uniforms["amount"].value = 0.0015
+    composer.addPass(effect)
+
     const animate = (t) => {
       stats.begin()
 
@@ -284,7 +320,8 @@ const THREECanvas = () => {
       // small up and down movement
       if (th.sphereGroup.position) th.sphereGroup.position.y = Math.sin(t / 500) / 50
 
-      th.renderer.render(th.scene, th.camera)
+      composer.render()
+      // th.renderer.render(th.scene, th.camera)
       stats.end()
       requestAnimationFrame(animate)
     }
