@@ -112,6 +112,7 @@ const reducer = (state, action) => {
       const newState = { ...state }
       newState.sortedName[0] = true
       newState.sortedReviewCount[0] = false
+      newState.sortedGenre[0] = false
       if (state.sortedName[1] === 0) {
         newState.sortedName[1] = 1
         newState.reviewers = state.reviewers.sort((a, b) => {
@@ -137,6 +138,7 @@ const reducer = (state, action) => {
       const newState2 = { ...state }
       newState2.sortedName[0] = false
       newState2.sortedReviewCount[0] = true
+      newState2.sortedGenre[0] = false
       if (state.sortedReviewCount[1] === 0) {
         newState2.sortedReviewCount[1] = 1
         newState2.reviewers = state.reviewers.sort((revA, revB) => revA.reviewCount - revB.reviewCount)
@@ -145,6 +147,34 @@ const reducer = (state, action) => {
         newState2.reviewers = state.reviewers.sort((revA, revB) => revB.reviewCount - revA.reviewCount)
       }
       return newState2
+
+    case "SORT_GENRE":
+      console.log("???", state.sortedGenre)
+      const newState3 = { ...state }
+      newState3.sortedName[0] = false
+      newState3.sortedReviewCount[0] = false
+      newState3.sortedGenre[0] = true
+      if (state.sortedGenre[1] === 0) {
+        newState3.sortedGenre[1] = 1
+        newState3.reviewers = state.reviewers.sort((a, b) => {
+          const genreA = a.preferedGenre.toUpperCase() // ignore upper and lowercase
+          const genreB = b.preferedGenre.toUpperCase() // ignore upper and lowercase
+          if (genreA < genreB) return -1
+          if (genreA > genreB) return 1
+          return 0
+        })
+      } else if (state.sortedGenre[1] === 1) {
+        newState3.sortedGenre[1] = 0
+        newState3.reviewers = state.reviewers.sort((a, b) => {
+          const genreA = a.preferedGenre.toUpperCase() // ignore upper and lowercase
+          const genreB = b.preferedGenre.toUpperCase() // ignore upper and lowercase
+          if (genreA > genreB) return -1
+          if (genreA < genreB) return 1
+          return 0
+        })
+      }
+      console.log(newState3.reviewers)
+      return newState3
 
     default:
       return state
@@ -155,6 +185,7 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
   const [reviewSort, dispatch] = useReducer(reducer, {
     sortedName: [true, 0],
     sortedReviewCount: [false, 0],
+    sortedGenre: [false, 0],
     reviewers,
   })
 
@@ -202,7 +233,10 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
               </div>
             </div>
             <div className="right">
-              <div className="genres">prefered genre</div>
+              <div onClick={() => dispatch({ type: "SORT_GENRE" })} className="genres filter-group">
+                <span>genres</span>
+                <img alt="" className="filter-button" src={filterButton}></img>
+              </div>
               <div onClick={() => dispatch({ type: "SORT_REVIEWCOUNT" })} className="reviews filter-group">
                 <span>reviews</span>
                 <img alt="" className="filter-button" src={filterButton}></img>
