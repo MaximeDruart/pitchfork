@@ -118,7 +118,7 @@ const recMultiGenre = (reviews, index, res) => {
 // let rawdata = fs.readFileSync("./srcLast.json")
 // let src = JSON.parse(rawdata)
 
-const rawUrlData = require("../test/srcLast4.json")
+// const rawUrlData = require("../test/srcLast4.json")
 
 router.post("/src", (req, res) => {
   // Review.updateMany({}, {coverSrc : ""})

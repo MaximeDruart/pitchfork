@@ -310,9 +310,6 @@ const THREECanvas = () => {
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const randomColor = () =>
-    `rgb(${gsap.utils.random(0, 255, 1)}, ${gsap.utils.random(0, 255, 1)}, ${gsap.utils.random(0, 255, 1)})`
-
   useEffect(() => {
     const sphereIntros = new THREE.Group()
     // const linemat = new THREE.LineBasicMaterial()
@@ -357,7 +354,7 @@ const THREECanvas = () => {
 
       const introTl = gsap.timeline({ repeat: -1 }).addLabel("sync")
       sphereIntros.children.forEach((sphere) => {
-        introTl.to(sphere.position, { duration: 4, keyframes: sphere.userData.keyframes }, "-=3.5")
+        introTl.to(sphere.position, { duration: 4, keyframes: sphere.userData.keyframes }, "-=3.7")
       })
       th.camera.position.set(0, 0, 6)
       th.scene.add(sphereIntros)

@@ -26,15 +26,10 @@ export const getReviews = (filters = {}, exclusions = [], sampleSize = 8500) => 
   return (dispatch) => {
     dispatch(fetchReviewsRequest())
     axios
-      .post("http://localhost:3001/reviews/find/agg", {
+      .post("/reviews/find/agg", {
         exclusions,
         sampleSize,
       })
-      // .post("http://localhost:3001/reviews/find", {
-      //   filters,
-      //   exclusions,
-      //   limit: limit,
-      // })
       .then((response) => {
         dispatch(fetchReviewsSuccess(response.data))
       })
@@ -75,7 +70,7 @@ export const getReviewers = (filters = {}, exclusions = []) => {
   return (dispatch) => {
     dispatch(fetchReviewersRequest())
     axios
-      .post("http://localhost:3001/reviewers/find", {
+      .post("/reviewers/find", {
         filters,
         exclusions,
       })
