@@ -1,11 +1,12 @@
 import React, { useEffect, useLayoutEffect, useState } from "react"
 import { useDispatch, useSelector, shallowEqual } from "react-redux"
 import { getReviews, setGenres, setScores } from "../../redux/actions/apiActions"
-import styled from "styled-components"
+import styled, { keyframes, css } from "styled-components"
 import { st } from "../../assets/StyledComponents"
 import GalaxySearchBar from "./interfaceChildren/GalaxySearchBar"
 import gsap from "gsap"
 import { useRef } from "react"
+import mouseSvg from "../../assets/icons/mouse.svg"
 
 const oto10 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -18,7 +19,7 @@ const Galaxy = () => {
 
   const reviews = useSelector((state) => state.api.reviews, shallowEqual)
   const { filteredGenres, filteredScores, allGenres, sampleSize } = useSelector((state) => state.api, shallowEqual)
-  // const { filteredGenres, filteredScores, allGenres } = useSelector((state) => state.api, shallowEqual)
+  const hasInteractedWithCanvas = useSelector((state) => state.interface.hasInteractedWithCanvas)
 
   useEffect(() => {
     if (reviews.length === 0) {
@@ -112,8 +113,9 @@ const Galaxy = () => {
   }, [])
 
   return (
-    <StyledGalaxy>
+    <StyledGalaxy loaded={!!reviews.length} int={hasInteractedWithCanvas}>
       <GalaxySearchBar />
+      <div className="help">click and drag to discover</div>
       <div className="scores">
         <div onClick={toggleAllScores} className="scores-title filter-title">
           ratings
@@ -134,8 +136,41 @@ const Galaxy = () => {
   )
 }
 
+const shinekf = keyframes`
+  from {opacity : 0.42};
+  to {opacity : 0.64};
+`
+
+const shine = () =>
+  css`
+    ${shinekf} 1.4s ease alternate infinite;
+  `
 
 const StyledGalaxy = styled.div`
+  .help {
+    position: absolute;
+    font-family: "Oswald-Light";
+    bottom: 10vh;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    text-transform: uppercase;
+    opacity: ${(p) => (p.int ? 0 : !p.loaded ? 0 : 0.6)};
+    transition: opacity 0.7s 0.4s ease-in-out;
+    pointer-events: none;
+
+    &:after {
+      content: "";
+      position: absolute;
+      right: -34px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      background: no-repeat center url(${mouseSvg});
+      animation: ${shine};
+    }
+  }
   .scores,
   .genres {
     position: absolute;

@@ -7,7 +7,7 @@ import styled from "styled-components"
 import { useSelector, useDispatch, shallowEqual } from "react-redux"
 import { useLocation } from "react-router-dom"
 import { dateToYearPercent, degToRad } from "./utils"
-import { setHoveredAlbum, setAlbumPosition } from "../../redux/actions/interfaceActions"
+import { setHoveredAlbum, setAlbumPosition, setCanvasInteraction } from "../../redux/actions/interfaceActions"
 import Stats from "stats.js"
 import { st } from "../../assets/StyledComponents"
 import { textTextures, scoreTextures } from "../../assets/textTextures"
@@ -217,6 +217,7 @@ const THREECanvas = () => {
       mouse.y = -(y / window.innerHeight) * 2 + 1
     }
     const onMouseDownHandler = (event) => {
+      dispatch(setCanvasInteraction())
       if (event.target.tagName === "CANVAS") clicking = true
     }
     const onMouseUpHandler = () => (clicking = false)

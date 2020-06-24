@@ -12,3 +12,7 @@ export const setAlbumPosition = (payload) => ({
   type: "SET_ALBUM_POSITION",
   payload,
 })
+
+export const setCanvasInteraction = () => ({
+  type: "SET_CANVAS_INTERACTION",
+})

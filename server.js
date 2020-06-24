@@ -35,6 +35,8 @@ if (process.env.NODE_ENV === "production") {
   })
 }
 
+console.log(path.resolve(__dirname, "client", "build", "index.html"))
+
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`)
 })
