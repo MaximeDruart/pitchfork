@@ -46,7 +46,6 @@ const apiReducer = (state = initialState, action) => {
           }
 
         case "success":
-          console.log("returning reviews")
           return {
             ...state,
             loading: false,

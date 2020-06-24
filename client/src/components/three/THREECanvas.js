@@ -1,3 +1,5 @@
+/* eslint react-hooks/exhaustive-deps: 0 */
+
 import React, { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
@@ -8,14 +10,9 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux"
 import { useLocation } from "react-router-dom"
 import { dateToYearPercent, degToRad } from "./utils"
 import { setHoveredAlbum, setAlbumPosition, setCanvasInteraction } from "../../redux/actions/interfaceActions"
-import Stats from "stats.js"
 import { st } from "../../assets/StyledComponents"
 import { textTextures, scoreTextures } from "../../assets/textTextures"
 import SimplexNoise from "simplex-noise"
-
-const stats = new Stats()
-stats.showPanel(0)
-document.body.appendChild(stats.dom)
 
 gsap.registerPlugin(ThreePlugin)
 
@@ -242,8 +239,6 @@ const THREECanvas = () => {
     $canvas.current.appendChild(th.renderer.domElement)
 
     const animate = (t) => {
-      stats.begin()
-
       // camera movements
       th.controls && th.controls.update()
       th.tbcontrols && th.tbcontrols.update()
@@ -286,7 +281,6 @@ const THREECanvas = () => {
       if (th.sphereGroup.position) th.sphereGroup.position.y = Math.sin(t / 500) / 50
 
       th.renderer.render(th.scene, th.camera)
-      stats.end()
       requestAnimationFrame(animate)
     }
 
@@ -311,23 +305,18 @@ const THREECanvas = () => {
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const randomProp = (obj) => {
+    const keys = Object.keys(obj)
+    return obj[keys[(keys.length * Math.random()) << 0]]
+  }
+
   useEffect(() => {
-    const sphereIntros = new THREE.Group()
-    // const linemat = new THREE.LineBasicMaterial()
-    // const followLine = new THREE.Line()
-    sphereIntros.name = "sphereIntros"
-    const randomProp = (obj) => {
-      const keys = Object.keys(obj)
-      return obj[keys[(keys.length * Math.random()) << 0]]
-    }
-
-    // $canvas.current.style.zIndex = 100000
-    // $canvas.current.style.pointerEvents = "none"
-
-    sphereIntros.rotation.y = -Math.PI / 6
-    sphereIntros.rotation.x = -Math.PI / 7
-    sphereIntros.position.y = -0.5
     if (pathname === "/") {
+      const sphereIntros = new THREE.Group()
+      sphereIntros.name = "sphereIntros"
+      sphereIntros.rotation.y = -Math.PI / 6
+      sphereIntros.rotation.x = -Math.PI / 7
+      sphereIntros.position.y = -0.5
       for (let i = 0; i < 200; i++) {
         const sphere = new THREE.Mesh(
           th.sphere.geometry,
@@ -360,7 +349,7 @@ const THREECanvas = () => {
       th.camera.position.set(0, 0, 6)
       th.scene.add(sphereIntros)
     }
-  }, [])
+  }, [pathname])
 
   // galaxy scene set up
   useEffect(() => {
@@ -453,7 +442,7 @@ const THREECanvas = () => {
           })
       }
     }
-  }, [reviews, pathname])
+  }, [reviews, pathname, loading])
 
   // galaxy filter updates
   useEffect(() => {
@@ -470,7 +459,7 @@ const THREECanvas = () => {
         })
       }
     }
-  }, [filteredReviews])
+  }, [filteredReviews, loading, pathname, reviews.length, spawnDone])
 
   // REVIEWERDETAIL scene setup
   useEffect(() => {
@@ -647,8 +636,6 @@ const THREECanvas = () => {
         th.sphereGroup.add(lineGroup)
         th.scene.add(th.sphereGroup)
 
-        console.log(th.scene.children)
-
         const labelsMaterials = [
           scoreLabel1.material,
           scoreLabel2.material,
@@ -688,7 +675,7 @@ const THREECanvas = () => {
           gsap.to(centerLine.scale, { duration: 0.6, x: 0.01, y: 0.01, z: 0.01, yoyo: true, repeat: -1 })
       }
     }
-  }, [activeReviewer, reviews.length])
+  }, [activeReviewer, reviews.length, pathname, reviews])
 
   return <StyledCanvasContainer pathname={pathname} ref={$canvas} />
 }

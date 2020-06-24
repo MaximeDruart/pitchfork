@@ -103,7 +103,6 @@ const StyledAllReviewers = styled.div`
 `
 
 const reducer = (state, action) => {
-  console.log("dispatched")
   switch (action.type) {
     case "SORT_NAME":
       const newState = { ...state }
@@ -135,15 +134,12 @@ const reducer = (state, action) => {
       newState2.sortedName[0] = false
       newState2.sortedReviewCount[0] = true
       if (state.sortedReviewCount[1] === 0) {
-        console.log("asc count")
         newState2.sortedReviewCount[1] = 1
         newState2.reviewers = state.reviewers.sort((revA, revB) => revA.reviewCount - revB.reviewCount)
       } else if (state.sortedReviewCount[1] === 1) {
-        console.log("desc count")
         newState2.sortedReviewCount[1] = 0
         newState2.reviewers = state.reviewers.sort((revA, revB) => revB.reviewCount - revA.reviewCount)
       }
-      console.log(state, newState2)
       return newState2
 
     default:
@@ -210,7 +206,6 @@ const ReviewersOverlay = ({ show, setShow, reviewers }) => {
                 <img
                   onClick={() => {
                     dispatch({ type: "SORT_REVIEWCOUNT" })
-                    console.log("click !")
                   }}
                   alt=""
                   className="filter-button"

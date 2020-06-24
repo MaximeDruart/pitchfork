@@ -2,7 +2,7 @@ import React from "react"
 import styled from "styled-components"
 import { NavButton } from "../../assets/StyledComponents"
 
-// Import icons 
+// Import icons
 import pitchforkLogo from "../../assets/icons/logo-pitchfork.svg"
 
 const IntroContainer = styled.div`
@@ -39,24 +39,23 @@ const IntroContainer = styled.div`
       font-family: "Oswald-Light";
     }
   }
-  .over-title a{
+  .over-title a {
     display: flex;
     align-items: center;
     cursor: pointer;
-    img{
+    img {
       width: 20px;
       height: 20px;
       margin-right: 10px;
       z-index: 1000;
     }
-    p{
+    p {
       margin: 0;
       z-index: 1000;
     }
   }
   .intro-button {
   }
-
 `
 
 const Intro = () => {
@@ -64,7 +63,7 @@ const Intro = () => {
     <IntroContainer>
       <div className="text-container">
         <div className="over-title">
-          <a href="https://pitchfork.com/" target="_blank">
+          <a href="https://pitchfork.com/" rel="noopener noreferrer" target="_blank">
             <img src={pitchforkLogo} alt="Pitchfork logo"></img>
             <p>Pitchfork</p>
           </a>

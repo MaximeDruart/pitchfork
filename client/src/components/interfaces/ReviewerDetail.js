@@ -111,9 +111,6 @@ const ReviewerDetail = () => {
             <div className="info-title">Most used words</div>
             <div className="info-content used-words">{preferedWords}</div>
           </div>
-          <div className="info">
-            <div className="info-title">Other graph</div>
-          </div>
         </div>
       </div>
     </ReviewerContainer>

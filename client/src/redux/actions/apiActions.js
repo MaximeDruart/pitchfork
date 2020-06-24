@@ -101,7 +101,6 @@ export const setScores = (payload) => ({
 })
 
 export const setSearch = (payload) => {
-  console.log("action triggered")
   return {
     type: "SET_SEARCH",
     payload,

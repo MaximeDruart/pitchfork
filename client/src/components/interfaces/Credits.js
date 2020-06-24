@@ -2,8 +2,6 @@ import React from "react"
 import styled from "styled-components"
 
 // Import icons
-import pitchforkLogo from "../../assets/icons/logo-pitchfork.svg"
-import nextLeftButton from "../../assets/icons/next-left.svg"
 import behance from "../../assets/icons/behance.svg"
 import linkedin from "../../assets/icons/linkedin.svg"
 import github from "../../assets/icons/github.svg"
@@ -136,7 +134,7 @@ const Credits = () => {
                 <div className="name">Pierre BORNSTEIN</div>
                 <div className="role">Data analyst, Marketing manager</div>
                 <div className="social-networks">
-                  <a href="#" target="_blank" rel="noreferrer noopener">
+                  <a href="https://www.linkedin.com/in/pierrebornstein/" target="_blank" rel="noreferrer noopener">
                     <img src={linkedin} alt="social-network"></img>
                   </a>
                   <a
@@ -146,22 +144,22 @@ const Credits = () => {
                   >
                     <img src={github} alt="social-network"></img>
                   </a>
-                  <a href="#" target="_blank" rel="noreferrer noopener">
+                  {/* <a href="#" target="_blank" rel="noreferrer noopener">
                     <img src={behance} alt="social-network"></img>
-                  </a>
+                  </a> */}
                 </div>
               </div>
               <div className="member">
                 <div className="name">Maxime DRUART</div>
                 <div className="role">Front-end developer, back-end developer</div>
                 <div className="social-networks">
-                  <a href="#" target="_blank" rel="noreferrer noopener">
+                  <a href="https://www.linkedin.com/in/pierrebornstein/" target="_blank" rel="noreferrer noopener">
                     <img src={linkedin} alt="social-network"></img>
                   </a>
-                  <a href="#" target="_blank" rel="noreferrer noopener">
+                  <a href="http://github.com/maximeDruart/" target="_blank" rel="noreferrer noopener">
                     <img src={github} alt="social-network"></img>
                   </a>
-                  <a href="#" target="_blank" rel="noreferrer noopener">
+                  <a href="https://www.behance.net/maximedruart" target="_blank" rel="noreferrer noopener">
                     <img src={behance} alt="social-network"></img>
                   </a>
                 </div>
@@ -181,6 +179,9 @@ const Credits = () => {
             This site was created for educational purposes as part of the Grande Ecole course at HETIC. The content and
             data presented have not been the subject of a request for a right of use. In no case will this site be used
             for commercial purposes.
+            <br />
+            Background Music : Watermusic 2 by William Basinski. All right reserved William Basinski / [Merlin] SC
+            Distribution.
           </div>
         </div>
       </div>

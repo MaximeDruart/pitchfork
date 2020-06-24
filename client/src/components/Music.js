@@ -92,7 +92,7 @@ const Music = () => {
     )
     audio.addEventListener("ended", playAudio)
     return () => audio.removeEventListener("ended", playAudio)
-  }, [])
+  }, [audio])
 
   return (
     <MusicContainer dum={dum} volume={audio.volume}>

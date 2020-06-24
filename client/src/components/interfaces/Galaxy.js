@@ -23,7 +23,6 @@ const Galaxy = () => {
 
   useEffect(() => {
     if (reviews.length === 0) {
-      console.log("fetching reviews")
       dispatch(getReviews({}, ["review", "role", "bnm", "id"], sampleSize))
     }
   }, [reviews, dispatch, sampleSize])
