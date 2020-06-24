@@ -11,19 +11,19 @@ import github from "../../assets/icons/github.svg"
 const CreditsContainer = styled.div`
   font-family: "Oswald-Light";
   color: white;
-  .header{
+  .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 1200px;
     margin: 0 auto;
     padding: 60px 0px;
-    img.go-back{
+    img.go-back {
       width: 25px;
       height: 25px;
     }
   }
-  .container{
+  .container {
     width: 1200px;
     margin: 0 auto;
     display: flex;
@@ -33,24 +33,24 @@ const CreditsContainer = styled.div`
     .team {
       display: flex;
       justify-content: space-between;
-      flex-direction row;
+      flex-direction: row;
       width: 550px;
       .align-column {
         display: flex;
         flex-direction: column;
       }
-      .member{
+      .member {
         padding-right: 20px;
         margin-bottom: 15px;
-        .name{
+        .name {
           font-size: 24px;
         }
-        .role{
+        .role {
           font-family: "Oswald-ExtraLight";
-          margin-bottom 15px;
+          margin-bottom: 15px;
           font-size: 18px;
         }
-        img{
+        img {
           width: 28px;
           height: 28px;
           color: white;
@@ -58,7 +58,7 @@ const CreditsContainer = styled.div`
           opacity: 0.5;
           transition: 1s;
         }
-        img:hover{
+        img:hover {
           opacity: 1;
         }
       }
@@ -70,7 +70,6 @@ const CreditsContainer = styled.div`
         font-family: "Oswald-ExtraLight";
         font-size: 22px;
         padding-bottom: 55px;
-        
       }
     }
   }
@@ -80,14 +79,15 @@ const CreditsContainer = styled.div`
     font-size: 30px;
     margin-bottom: 25px;
   }
-  
 `
 
 const Credits = () => {
-  return ( 
+  return (
     <CreditsContainer>
       <div className="header">
-        <a href="#"><img className="go-back" src={nextLeftButton} alt="return"></img></a>
+        {/* <a href="#">
+          <img className="go-back" src={nextLeftButton} alt="return"></img>
+        </a> */}
       </div>
       <div className="container">
         <div className="align-column">
@@ -95,67 +95,75 @@ const Credits = () => {
           <div className="team">
             <div className="align-column">
               <div className="member">
-                <div className="name">
-                  Joëlla AKOUATÉ
-                </div> 
-                <div className="role">
-                  UX/UI Designer
-                </div>
+                <div className="name">Joëlla AKOUATÉ</div>
+                <div className="role">UX/UI Designer</div>
                 <div className="social-networks">
-                  <a href="https://www.linkedin.com/in/joellaakouate/" target="_blank"><img src={linkedin} alt="social-network"></img></a>
-                  <a href="https://www.behance.net/joellaakouate" target="_blank"><img src={behance} alt="social-network"></img></a>
+                  <a href="https://www.linkedin.com/in/joellaakouate/" target="_blank" rel="noreferrer noopener">
+                    <img src={linkedin} alt="social-network"></img>
+                  </a>
+                  <a href="https://www.behance.net/joellaakouate" target="_blank" rel="noreferrer noopener">
+                    <img src={behance} alt="social-network"></img>
+                  </a>
                 </div>
               </div>
               <div className="member">
-                <div className="name">
-                  Aurélie DO
-                </div>
-                <div className="role">
-                  UX/UI Designer, front-end developer
-                </div>
+                <div className="name">Aurélie DO</div>
+                <div className="role">UX/UI Designer, front-end developer</div>
                 <div className="social-networks">
-                  <a href="https://www.linkedin.com/in/aureliedo/" target="_blank"><img src={linkedin} alt="social-network"></img></a>
-                  <a href="https://www.behance.net/aureliedo" target="_blank"><img src={behance} alt="social-network"></img></a>
+                  <a href="https://www.linkedin.com/in/aureliedo/" target="_blank" rel="noreferrer noopener">
+                    <img src={linkedin} alt="social-network"></img>
+                  </a>
+                  <a href="https://www.behance.net/aureliedo" target="_blank" rel="noreferrer noopener">
+                    <img src={behance} alt="social-network"></img>
+                  </a>
                 </div>
               </div>
               <div className="member">
-                <div className="name">
-                  Céline SUNG
-                </div>
-                <div className="role">
-                  UX/UI Designer, front-end developer
-                </div>
+                <div className="name">Céline SUNG</div>
+                <div className="role">UX/UI Designer, front-end developer</div>
                 <div className="social-networks">
-                  <a href="https://www.linkedin.com/in/celinesung/" target="_blank"><img src={linkedin} alt="social-network"></img></a>
-                  <a href="https://www.behance.net/celinesung" target="_blank"><img src={behance} alt="social-network"></img></a>
+                  <a href="https://www.linkedin.com/in/celinesung/" target="_blank" rel="noreferrer noopener">
+                    <img src={linkedin} alt="social-network"></img>
+                  </a>
+                  <a href="https://www.behance.net/celinesung" target="_blank" rel="noreferrer noopener">
+                    <img src={behance} alt="social-network"></img>
+                  </a>
                 </div>
               </div>
             </div>
             <div className="align-column">
               <div className="member">
-                <div className="name">
-                  Pierre BORNSTEIN
-                </div>
-                <div className="role">
-                  Marketing manager
-                </div>
+                <div className="name">Pierre BORNSTEIN</div>
+                <div className="role">Data analyst, Marketing manager</div>
                 <div className="social-networks">
-                  <a href="#" target="_blank"><img src={linkedin} alt="social-network"></img></a>
-                  <a href="#" target="_blank"><img src={github} alt="social-network"></img></a>
-                  <a href="#" target="_blank"><img src={behance} alt="social-network"></img></a>
+                  <a href="#" target="_blank" rel="noreferrer noopener">
+                    <img src={linkedin} alt="social-network"></img>
+                  </a>
+                  <a
+                    href="https://www.youtube.com/channel/UCsIzfsOcObtsEXOwtsFlcFA/videos"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <img src={github} alt="social-network"></img>
+                  </a>
+                  <a href="#" target="_blank" rel="noreferrer noopener">
+                    <img src={behance} alt="social-network"></img>
+                  </a>
                 </div>
               </div>
               <div className="member">
-                <div className="name">
-                  Maxime DRUART
-                </div>
-                <div className="role">
-                  Front-end developer, back-end developer
-                </div>
+                <div className="name">Maxime DRUART</div>
+                <div className="role">Front-end developer, back-end developer</div>
                 <div className="social-networks">
-                  <a href="#" target="_blank"><img src={linkedin} alt="social-network"></img></a>
-                  <a href="#" target="_blank"><img src={github} alt="social-network"></img></a>
-                  <a href="#" target="_blank"><img src={behance} alt="social-network"></img></a>
+                  <a href="#" target="_blank" rel="noreferrer noopener">
+                    <img src={linkedin} alt="social-network"></img>
+                  </a>
+                  <a href="#" target="_blank" rel="noreferrer noopener">
+                    <img src={github} alt="social-network"></img>
+                  </a>
+                  <a href="#" target="_blank" rel="noreferrer noopener">
+                    <img src={behance} alt="social-network"></img>
+                  </a>
                 </div>
               </div>
             </div>
@@ -164,15 +172,18 @@ const Credits = () => {
         <div className="right">
           <div className="about-us">
             <div className="title">about us</div>
-            Music is a timeless art whose trends change rapidly. The ambition of this Pitchfork project is to analyze the evolution of critics in order to visualize the different musical trends and genres in a defined time space.
+            Music is a timeless art whose trends change rapidly. The ambition of this Pitchfork project is to analyze
+            the evolution of critics in order to visualize the different musical trends and genres in a defined time
+            space.
           </div>
           <div className="disclaimer">
             <div className="title">disclaimer</div>
-            This site was created for educational purposes as part of the Grande Ecole course at HETIC. The content and data presented have not been the subject of a request for a right of use. In no case will this site be used for commercial purposes.
+            This site was created for educational purposes as part of the Grande Ecole course at HETIC. The content and
+            data presented have not been the subject of a request for a right of use. In no case will this site be used
+            for commercial purposes.
           </div>
         </div>
       </div>
-      
     </CreditsContainer>
   )
 }

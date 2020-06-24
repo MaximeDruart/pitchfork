@@ -11,7 +11,8 @@ const StyledOverlay = styled.div`
   width: 100vw;
   height: 100vh;
   background-color: #0c0a17;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
   z-index: 2000;
   position: fixed;
   .header {

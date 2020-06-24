@@ -1,6 +1,8 @@
 import React from "react"
 import styled from "styled-components"
 import { useSelector } from "react-redux"
+import { Link } from "react-router-dom"
+import slugify from "slugify"
 
 const StyledPopup = styled.div`
   display: ${(props) => (props.show ? "block" : "none")};
@@ -65,7 +67,7 @@ const GalaxyPopup = () => {
           <div className="album-artist">{hoveredAlbum?.artist}</div>
           <div className="reviewer">
             Reviewed by
-            <span className="author-review">{hoveredAlbum?.author}</span>
+            <span className="author-review">{hoveredAlbum?.author} </span>
             on {hoveredAlbum?.date?.split(" ")[2]}
           </div>
           <div className="score">{hoveredAlbum?.score}/10</div>
@@ -77,6 +79,9 @@ const GalaxyPopup = () => {
           >
             Read on pitchfork
           </a>
+          <div>
+            <Link to={`/reviewer/${slugify(hoveredAlbum ? hoveredAlbum.author : "").toLowerCase()}`}>See reviewer</Link>
+          </div>
         </div>
       </div>
     </StyledPopup>

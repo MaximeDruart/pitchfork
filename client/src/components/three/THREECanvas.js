@@ -11,6 +11,7 @@ import { setHoveredAlbum, setAlbumPosition } from "../../redux/actions/interface
 import Stats from "stats.js"
 import { st } from "../../assets/StyledComponents"
 import { textTextures, scoreTextures } from "../../assets/textTextures"
+import SimplexNoise from "simplex-noise"
 
 const stats = new Stats()
 stats.showPanel(0)
@@ -61,6 +62,7 @@ const th = {
   textures: [],
   scoreTextures: [],
   infiniteRotationTl: "",
+  simplex: new SimplexNoise(),
 }
 th.cameraHelper = new THREE.CameraHelper(th.camera)
 th.sphere.mesh = new THREE.Mesh(th.sphere.geometry, th.sphere.material)
@@ -78,6 +80,7 @@ const centerLine = new THREE.Line(
     color: "white",
     transparent: true,
     opacity: 0.25,
+    linewidth: 5,
   })
 )
 centerLine.rotation.z = degToRad(13)
@@ -105,15 +108,12 @@ const THREECanvas = () => {
     }
     th.controls.enableDamping = true
     th.controls.enableRotate = false
-    th.controls.enableZoom = true
+    th.controls.enableZoom = false
 
     th.controls.mouseButtons.LEFT = THREE.MOUSE.PAN
     th.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE
-    // th.controls.screenSpacePanning = true
     th.controls.panSpeed = 2
 
-    th.controls.maxDistance = 50
-    th.controls.minDistance = 5
     th.controls.dampingFactor = 0.05
     th.controls.addEventListener("change", () => {
       if (pathname === "/galaxy" && th.scene.fog) {
@@ -137,7 +137,12 @@ const THREECanvas = () => {
   const clearSceneOfSphereGroup = () => {
     if (th.scene?.children) {
       th.scene.children.forEach((child) => {
-        if (child.name === "sphereGroup" || child.name === "centerLine" || child.name === "yearLines")
+        if (
+          child.name === "sphereGroup" ||
+          child.name === "centerLine" ||
+          child.name === "yearLines" ||
+          child.name === "sphereIntros"
+        )
           th.scene.remove(child)
       })
     }
@@ -303,6 +308,60 @@ const THREECanvas = () => {
       window.removeEventListener("resize", resizeHandler)
     }
     //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const randomColor = () =>
+    `rgb(${gsap.utils.random(0, 255, 1)}, ${gsap.utils.random(0, 255, 1)}, ${gsap.utils.random(0, 255, 1)})`
+
+  useEffect(() => {
+    const sphereIntros = new THREE.Group()
+    // const linemat = new THREE.LineBasicMaterial()
+    // const followLine = new THREE.Line()
+    sphereIntros.name = "sphereIntros"
+    const randomProp = (obj) => {
+      const keys = Object.keys(obj)
+      return obj[keys[(keys.length * Math.random()) << 0]]
+    }
+
+    // $canvas.current.style.zIndex = 100000
+    // $canvas.current.style.pointerEvents = "none"
+
+    sphereIntros.rotation.y = -Math.PI / 6
+    sphereIntros.rotation.x = -Math.PI / 7
+    sphereIntros.position.y = -0.5
+    if (pathname === "/") {
+      for (let i = 0; i < 200; i++) {
+        const sphere = new THREE.Mesh(
+          th.sphere.geometry,
+          new THREE.MeshPhongMaterial({
+            color: randomProp(st.genresColors),
+            transparent: true,
+            opacity: 0.8,
+          })
+        )
+
+        sphere.position.x = -22
+        const keyframes = []
+        const noiseXOffset = gsap.utils.random(0, 1000, 1)
+        for (let x = 0; x < 80; x++) {
+          keyframes.push({
+            x: sphere.position.x + x / 1.6,
+            y: th.simplex.noise2D(noiseXOffset + x / 30, 0) * 2.5,
+            z: th.simplex.noise2D(0, noiseXOffset + x / 30) * 2.5,
+            ease: "linear",
+          })
+          sphere.userData.keyframes = keyframes
+        }
+        sphereIntros.add(sphere)
+      }
+
+      const introTl = gsap.timeline({ repeat: -1 }).addLabel("sync")
+      sphereIntros.children.forEach((sphere) => {
+        introTl.to(sphere.position, { duration: 4, keyframes: sphere.userData.keyframes }, "-=3.5")
+      })
+      th.camera.position.set(0, 0, 6)
+      th.scene.add(sphereIntros)
+    }
   }, [])
 
   // galaxy scene set up
